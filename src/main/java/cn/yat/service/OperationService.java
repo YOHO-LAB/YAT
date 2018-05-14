@@ -345,8 +345,8 @@ public class OperationService{
                 dsParamMapNew = new HashMap<>();
             }
             Testcase oTestcase = ts.getById(tcId);
-            Map<String,Parameter> globalParamMapNew = pu.getGlobalParamMap(oTestcase.getTestEnvId(),null);
-            RunHttpResultEntity response = ts.runCase(oTestcase,null,globalParamMapNew,dsParamMapNew,httpResponseParamMap);
+            //Map<String,Parameter> globalParamMapNew = pu.getGlobalParamMap(oTestcase.getTestEnvId(),null);
+            RunHttpResultEntity response = ts.runCase(oTestcase,null,globalParamMap,dsParamMapNew,httpResponseParamMap);
             if(!response.isPass()){
                 LogUtil.addLog(uuid,title,"执行用例 失败：caseId="+tcId+"，原因："+response.getException(),"white","red","");
                 throw new Exception(response.getException());
