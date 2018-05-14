@@ -1,0 +1,528 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.yat.mapper.TestcaseMapper" >
+  <resultMap id="BaseResultMap" type="cn.yat.entity.Testcase" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="team_id" property="teamId" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="service_id" property="serviceId" jdbcType="INTEGER" />
+    <result column="test_env_id" property="testEnvId" jdbcType="INTEGER" />
+    <result column="method" property="method" jdbcType="VARCHAR" />
+    <result column="is_post" property="isPost" jdbcType="BIT" />
+    <result column="url" property="url" jdbcType="VARCHAR" />
+    <result column="parameters" property="parameters" jdbcType="VARCHAR" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+    <result column="pre_ops_ids" property="preOpsIds" jdbcType="VARCHAR" />
+    <result column="after_test_ops_ids" property="afterTestOpsIds" jdbcType="VARCHAR" />
+    <result column="post_ops_ids" property="postOpsIds" jdbcType="VARCHAR" />
+    <result column="http_code_check" property="httpCodeCheck" jdbcType="VARCHAR" />
+    <result column="contain_check" property="containCheck" jdbcType="VARCHAR" />
+    <result column="not_contain_check" property="notContainCheck" jdbcType="VARCHAR" />
+    <result column="json_check" property="jsonCheck" jdbcType="VARCHAR" />
+    <result column="db_check" property="dbCheck" jdbcType="VARCHAR" />
+    <result column="add_time" property="addTime" jdbcType="TIMESTAMP" />
+    <result column="add_user_id" property="addUserId" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="INTEGER" />
+    <result column="cookie_list" property="cookieList" jdbcType="VARCHAR" />
+    <result column="header_list" property="headerList" jdbcType="VARCHAR" />
+    <result column="get_http_res_list" property="getHttpResList" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, team_id, status, service_id, test_env_id, method, is_post, url, parameters, note, 
+    pre_ops_ids, after_test_ops_ids, post_ops_ids, http_code_check, contain_check, not_contain_check, 
+    json_check, db_check, add_time, add_user_id, update_time, update_user_id, cookie_list, 
+    header_list, get_http_res_list
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.TestcaseExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from testcase
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from testcase
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from testcase
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.yat.entity.TestcaseExample" >
+    delete from testcase
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.yat.entity.Testcase" >
+    insert into testcase (id, team_id, status, 
+      service_id, test_env_id, method, 
+      is_post, url, parameters, 
+      note, pre_ops_ids, after_test_ops_ids, 
+      post_ops_ids, http_code_check, contain_check, 
+      not_contain_check, json_check, db_check, 
+      add_time, add_user_id, update_time, 
+      update_user_id, cookie_list, header_list, 
+      get_http_res_list)
+    values (#{id,jdbcType=INTEGER}, #{teamId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{serviceId,jdbcType=INTEGER}, #{testEnvId,jdbcType=INTEGER}, #{method,jdbcType=VARCHAR}, 
+      #{isPost,jdbcType=BIT}, #{url,jdbcType=VARCHAR}, #{parameters,jdbcType=VARCHAR}, 
+      #{note,jdbcType=VARCHAR}, #{preOpsIds,jdbcType=VARCHAR}, #{afterTestOpsIds,jdbcType=VARCHAR}, 
+      #{postOpsIds,jdbcType=VARCHAR}, #{httpCodeCheck,jdbcType=VARCHAR}, #{containCheck,jdbcType=VARCHAR}, 
+      #{notContainCheck,jdbcType=VARCHAR}, #{jsonCheck,jdbcType=VARCHAR}, #{dbCheck,jdbcType=VARCHAR}, 
+      #{addTime,jdbcType=TIMESTAMP}, #{addUserId,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{updateUserId,jdbcType=INTEGER}, #{cookieList,jdbcType=VARCHAR}, #{headerList,jdbcType=VARCHAR}, 
+      #{getHttpResList,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.yat.entity.Testcase" >
+    insert into testcase
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="teamId != null" >
+        team_id,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="serviceId != null" >
+        service_id,
+      </if>
+      <if test="testEnvId != null" >
+        test_env_id,
+      </if>
+      <if test="method != null" >
+        method,
+      </if>
+      <if test="isPost != null" >
+        is_post,
+      </if>
+      <if test="url != null" >
+        url,
+      </if>
+      <if test="parameters != null" >
+        parameters,
+      </if>
+      <if test="note != null" >
+        note,
+      </if>
+      <if test="preOpsIds != null" >
+        pre_ops_ids,
+      </if>
+      <if test="afterTestOpsIds != null" >
+        after_test_ops_ids,
+      </if>
+      <if test="postOpsIds != null" >
+        post_ops_ids,
+      </if>
+      <if test="httpCodeCheck != null" >
+        http_code_check,
+      </if>
+      <if test="containCheck != null" >
+        contain_check,
+      </if>
+      <if test="notContainCheck != null" >
+        not_contain_check,
+      </if>
+      <if test="jsonCheck != null" >
+        json_check,
+      </if>
+      <if test="dbCheck != null" >
+        db_check,
+      </if>
+      <if test="addTime != null" >
+        add_time,
+      </if>
+      <if test="addUserId != null" >
+        add_user_id,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="updateUserId != null" >
+        update_user_id,
+      </if>
+      <if test="cookieList != null" >
+        cookie_list,
+      </if>
+      <if test="headerList != null" >
+        header_list,
+      </if>
+      <if test="getHttpResList != null" >
+        get_http_res_list,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="teamId != null" >
+        #{teamId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="serviceId != null" >
+        #{serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="testEnvId != null" >
+        #{testEnvId,jdbcType=INTEGER},
+      </if>
+      <if test="method != null" >
+        #{method,jdbcType=VARCHAR},
+      </if>
+      <if test="isPost != null" >
+        #{isPost,jdbcType=BIT},
+      </if>
+      <if test="url != null" >
+        #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters != null" >
+        #{parameters,jdbcType=VARCHAR},
+      </if>
+      <if test="note != null" >
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="preOpsIds != null" >
+        #{preOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="afterTestOpsIds != null" >
+        #{afterTestOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="postOpsIds != null" >
+        #{postOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="httpCodeCheck != null" >
+        #{httpCodeCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="containCheck != null" >
+        #{containCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="notContainCheck != null" >
+        #{notContainCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="jsonCheck != null" >
+        #{jsonCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="dbCheck != null" >
+        #{dbCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="addTime != null" >
+        #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="addUserId != null" >
+        #{addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null" >
+        #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="cookieList != null" >
+        #{cookieList,jdbcType=VARCHAR},
+      </if>
+      <if test="headerList != null" >
+        #{headerList,jdbcType=VARCHAR},
+      </if>
+      <if test="getHttpResList != null" >
+        #{getHttpResList,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.yat.entity.TestcaseExample" resultType="java.lang.Integer" >
+    select count(*) from testcase
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update testcase
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.teamId != null" >
+        team_id = #{record.teamId,jdbcType=INTEGER},
+      </if>
+      <if test="record.status != null" >
+        status = #{record.status,jdbcType=INTEGER},
+      </if>
+      <if test="record.serviceId != null" >
+        service_id = #{record.serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="record.testEnvId != null" >
+        test_env_id = #{record.testEnvId,jdbcType=INTEGER},
+      </if>
+      <if test="record.method != null" >
+        method = #{record.method,jdbcType=VARCHAR},
+      </if>
+      <if test="record.isPost != null" >
+        is_post = #{record.isPost,jdbcType=BIT},
+      </if>
+      <if test="record.url != null" >
+        url = #{record.url,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parameters != null" >
+        parameters = #{record.parameters,jdbcType=VARCHAR},
+      </if>
+      <if test="record.note != null" >
+        note = #{record.note,jdbcType=VARCHAR},
+      </if>
+      <if test="record.preOpsIds != null" >
+        pre_ops_ids = #{record.preOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.afterTestOpsIds != null" >
+        after_test_ops_ids = #{record.afterTestOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.postOpsIds != null" >
+        post_ops_ids = #{record.postOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="record.httpCodeCheck != null" >
+        http_code_check = #{record.httpCodeCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="record.containCheck != null" >
+        contain_check = #{record.containCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="record.notContainCheck != null" >
+        not_contain_check = #{record.notContainCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="record.jsonCheck != null" >
+        json_check = #{record.jsonCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dbCheck != null" >
+        db_check = #{record.dbCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="record.addTime != null" >
+        add_time = #{record.addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.addUserId != null" >
+        add_user_id = #{record.addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateUserId != null" >
+        update_user_id = #{record.updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="record.cookieList != null" >
+        cookie_list = #{record.cookieList,jdbcType=VARCHAR},
+      </if>
+      <if test="record.headerList != null" >
+        header_list = #{record.headerList,jdbcType=VARCHAR},
+      </if>
+      <if test="record.getHttpResList != null" >
+        get_http_res_list = #{record.getHttpResList,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update testcase
+    set id = #{record.id,jdbcType=INTEGER},
+      team_id = #{record.teamId,jdbcType=INTEGER},
+      status = #{record.status,jdbcType=INTEGER},
+      service_id = #{record.serviceId,jdbcType=INTEGER},
+      test_env_id = #{record.testEnvId,jdbcType=INTEGER},
+      method = #{record.method,jdbcType=VARCHAR},
+      is_post = #{record.isPost,jdbcType=BIT},
+      url = #{record.url,jdbcType=VARCHAR},
+      parameters = #{record.parameters,jdbcType=VARCHAR},
+      note = #{record.note,jdbcType=VARCHAR},
+      pre_ops_ids = #{record.preOpsIds,jdbcType=VARCHAR},
+      after_test_ops_ids = #{record.afterTestOpsIds,jdbcType=VARCHAR},
+      post_ops_ids = #{record.postOpsIds,jdbcType=VARCHAR},
+      http_code_check = #{record.httpCodeCheck,jdbcType=VARCHAR},
+      contain_check = #{record.containCheck,jdbcType=VARCHAR},
+      not_contain_check = #{record.notContainCheck,jdbcType=VARCHAR},
+      json_check = #{record.jsonCheck,jdbcType=VARCHAR},
+      db_check = #{record.dbCheck,jdbcType=VARCHAR},
+      add_time = #{record.addTime,jdbcType=TIMESTAMP},
+      add_user_id = #{record.addUserId,jdbcType=INTEGER},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      update_user_id = #{record.updateUserId,jdbcType=INTEGER},
+      cookie_list = #{record.cookieList,jdbcType=VARCHAR},
+      header_list = #{record.headerList,jdbcType=VARCHAR},
+      get_http_res_list = #{record.getHttpResList,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.yat.entity.Testcase" >
+    update testcase
+    <set >
+      <if test="teamId != null" >
+        team_id = #{teamId,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="serviceId != null" >
+        service_id = #{serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="testEnvId != null" >
+        test_env_id = #{testEnvId,jdbcType=INTEGER},
+      </if>
+      <if test="method != null" >
+        method = #{method,jdbcType=VARCHAR},
+      </if>
+      <if test="isPost != null" >
+        is_post = #{isPost,jdbcType=BIT},
+      </if>
+      <if test="url != null" >
+        url = #{url,jdbcType=VARCHAR},
+      </if>
+      <if test="parameters != null" >
+        parameters = #{parameters,jdbcType=VARCHAR},
+      </if>
+      <if test="note != null" >
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="preOpsIds != null" >
+        pre_ops_ids = #{preOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="afterTestOpsIds != null" >
+        after_test_ops_ids = #{afterTestOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="postOpsIds != null" >
+        post_ops_ids = #{postOpsIds,jdbcType=VARCHAR},
+      </if>
+      <if test="httpCodeCheck != null" >
+        http_code_check = #{httpCodeCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="containCheck != null" >
+        contain_check = #{containCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="notContainCheck != null" >
+        not_contain_check = #{notContainCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="jsonCheck != null" >
+        json_check = #{jsonCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="dbCheck != null" >
+        db_check = #{dbCheck,jdbcType=VARCHAR},
+      </if>
+      <if test="addTime != null" >
+        add_time = #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="addUserId != null" >
+        add_user_id = #{addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null" >
+        update_user_id = #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="cookieList != null" >
+        cookie_list = #{cookieList,jdbcType=VARCHAR},
+      </if>
+      <if test="headerList != null" >
+        header_list = #{headerList,jdbcType=VARCHAR},
+      </if>
+      <if test="getHttpResList != null" >
+        get_http_res_list = #{getHttpResList,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.yat.entity.Testcase" >
+    update testcase
+    set team_id = #{teamId,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      service_id = #{serviceId,jdbcType=INTEGER},
+      test_env_id = #{testEnvId,jdbcType=INTEGER},
+      method = #{method,jdbcType=VARCHAR},
+      is_post = #{isPost,jdbcType=BIT},
+      url = #{url,jdbcType=VARCHAR},
+      parameters = #{parameters,jdbcType=VARCHAR},
+      note = #{note,jdbcType=VARCHAR},
+      pre_ops_ids = #{preOpsIds,jdbcType=VARCHAR},
+      after_test_ops_ids = #{afterTestOpsIds,jdbcType=VARCHAR},
+      post_ops_ids = #{postOpsIds,jdbcType=VARCHAR},
+      http_code_check = #{httpCodeCheck,jdbcType=VARCHAR},
+      contain_check = #{containCheck,jdbcType=VARCHAR},
+      not_contain_check = #{notContainCheck,jdbcType=VARCHAR},
+      json_check = #{jsonCheck,jdbcType=VARCHAR},
+      db_check = #{dbCheck,jdbcType=VARCHAR},
+      add_time = #{addTime,jdbcType=TIMESTAMP},
+      add_user_id = #{addUserId,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      update_user_id = #{updateUserId,jdbcType=INTEGER},
+      cookie_list = #{cookieList,jdbcType=VARCHAR},
+      header_list = #{headerList,jdbcType=VARCHAR},
+      get_http_res_list = #{getHttpResList,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

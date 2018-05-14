@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation" ng-controller="ng-ctrl-yat">
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg" >
+            <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='TestData'"></div>
+            <div class="wrapper wrapper-content no-padding" ng-controller="ng-ctrl-yat-content" style="padding: 15px;">
+                <div class="container-fluid" style="padding-right:0px;padding-left:0px;">
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>参数化列表 <small class="m-l-sm">作用域：环境</small></h5>
+                                    <div class="ibox-tools">
+                                        <a href=""><input type="text" ng-model="s_param_name" placeholder="参数名称"/></a>
+                                        <a class="btn btn-xs" ng-click="getParam()"><i class="fa fa-search"> 搜索</i></a>
+                                        <a class="btn btn-success btn-xs" ng-click="openCompareDiv()"><i class="fa fa-copy" style="color: white;"> 参数复制</i></a>
+                                        <a class="btn btn-primary btn-xs" ng-click="clickAddParam()"><i class="fa fa-plus"> 新增参数</i></a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <div ng-show="openParamCopyDiv">
+                                            <div class="col-lg-12" >
+                                                <div class="form-group">
+                                                    <label class="control-label">目标 环境：</label>
+                                                    <select class="select2_env_diff_destination form-control">
+                                                        <option value="0">-- 选择 --</option>
+                                                        <option value="{{opt.id}}" ng-repeat="opt in environmentList">{{opt.name}}</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-3 m-t-xs">
+                                                <button class="form-control btn btn-outline btn-warning" ng-click="closeCompareDiv()"><i class="fa fa-copy"> 关闭</i></button>
+                                            </div>
+                                            <div class="col-lg-3 m-t-xs">
+                                                <button class="form-control btn btn-outline btn-primary" ng-click="diffParam()"><i class="fa fa-copy"> 对比差异</i></button>
+                                            </div>
+                                            <div class="col-lg-6 ">
+                                                <ul class="tag-list pull-right">
+                                                    <li class="text-info"><a href="" ng-style="tagStyle.miss" ng-click="clickTag('miss')"> <strong>目标 缺少的参数 {{missCount}}</strong></a></li>
+                                                    <li class="text-warning"><a href="" ng-style="tagStyle.more" ng-click="clickTag('more')"> <strong>目标 多出的参数 {{moreCount}}</strong></a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <div class="col-lg-12">
+                                                <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
+                                                <!--<div style="text-align: center"><small>总共{{totalPage}}页，当前第1页</small></div>-->
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <table class="table table-hover yatFixedTable">
+                                                    <thead>
+                                                    <tr>
+                                                        <th class="yatWrap">参数名称</th><th class="yatWrap">参数值</th>
+                                                        <!--<th class="yatWrap">服务名</th><th class="yatWrap">环境</th>-->
+                                                        <th class="yatWrap">参数说明</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr ng-repeat="tr in paramList" style="cursor: pointer" ng-class="{'text-navy': selectedTr.id==tr.id}" ng-click="clickTr(tr)">
+                                                        <td class="yatWrap">{{tr.name}}</td>
+                                                        <td class="yatWrap">{{tr.paramVal}}</td>
+                                                        <!--<td class="yatWrap">{{tr.serviceName}}</td>-->
+                                                        <!--<td class="yatWrap">{{tr.envName}}</td>-->
+                                                        <td class="yatWrap">{{tr.note}}</td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="ibox-footer">
+                                    <span class="pull-right">
+                                        <a class="btn btn-xs btn-info btn-outline" ng-show="parameter.id>0 && openParamCopyDiv && (diffMiss==true||diffMiss==undefined)" ng-click="copyParam(false,parameter.id)"> 单条复制</a>
+                                        <a class="btn btn-xs btn-info btn-outline" ng-show="openParamCopyDiv && (diffMiss==true||diffMiss==undefined)" ng-click="copyParam(false)"> 全部一键复制</a>
+                                        <a class="btn btn-xs btn-warning btn-outline" ng-show="openParamCopyDiv && diffMiss==false" ng-click="copyParam(true)"> 全部一键删除</a>
+                                    </span>
+                                    共{{totalCount}}条记录
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-6">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>参数化维护 <small>ID:{{parameter.id}}</small><strong class="m-l-sm text-navy" ng-show="successMsg">{{successMsg}}</strong><strong class="m-l-sm text-danger" ng-show="errorMsg">{{errorMsg}}</strong></h5>
+                                    <div class="ibox-tools">
+                                        <button class="btn btn-danger btn-xs" ng-click="clickDelParam()" ng-disabled="parameter.id==0"><i class="fa fa-trash"> 删除</i></button>
+                                        <button class="btn btn-primary btn-xs" ng-click="clickSaveParam()"><i class="fa fa-save"> 保存</i></button>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <form class="form-horizontal">
+                                            <!--<div class="form-group">-->
+                                                <!--<label class="col-lg-2 control-label">参数ID：</label>-->
+                                                <!--<div class="col-lg-6">-->
+                                                    <!--<input class="form-control" ng-model="parameter.id" ng-disabled="true"/>-->
+                                                <!--</div>-->
+                                                <!--<div class="col-lg-4">-->
+                                                    <!--<label class="control-label yatWrap"><i class="fa fa-info-circle text-muted"> 全局参数仅作用于关联的环境、服务名下</i></label>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                            <!--<div class="form-group">-->
+                                                <!--<label class="col-lg-2 control-label">服务名：</label>-->
+                                                <!--<div class="col-lg-6">-->
+                                                    <!--<select class="select2_service form-control">-->
+                                                        <!--<option value="0">&#45;&#45; 选择 &#45;&#45;</option>-->
+                                                        <!--<option value="{{opt.id}}" ng-repeat="opt in serviceList">{{opt.name}}</option>-->
+                                                    <!--</select>-->
+                                                <!--</div>-->
+                                                <!--<div class="col-lg-4">-->
+                                                    <!--<label class="control-label text-navy"><a href="service.html" target="_blank"><i class="fa fa-users"> 服务名维护</i></a></label>-->
+                                                    <!--<label class="control-label text-navy m-l"><a ng-click="getAllService()"><i class="fa fa-refresh"></i></a></label>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                            <!--<div class="form-group">-->
+                                                <!--<label class="col-lg-2 control-label">环境：</label>-->
+                                                <!--<div class="col-lg-6">-->
+                                                    <!--<select class="select2_env form-control">-->
+                                                        <!--<option value="0">&#45;&#45; 选择 &#45;&#45;</option>-->
+                                                        <!--<option value="{{opt.id}}" ng-repeat="opt in environmentList">{{opt.name}}</option>-->
+                                                    <!--</select>-->
+                                                <!--</div>-->
+                                                <!--<div class="col-lg-4">-->
+                                                    <!--<label class="control-label text-navy"><a href="environment.html" target="_blank"><i class="fa fa-users"> 环境维护</i></a></label>-->
+                                                    <!--<label class="control-label text-navy m-l"><a ng-click="getAllEnvironment()"><i class="fa fa-refresh"></i></a></label>-->
+                                                <!--</div>-->
+                                            <!--</div>-->
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">参数名：</label>
+                                                <div class="col-lg-10">
+                                                    <input class="form-control" ng-model="parameter.name" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">备注：</label>
+                                                <div class="col-lg-10">
+                                                    <input class="form-control" ng-model="parameter.note" />
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">参数类型：</label>
+                                                <div class="col-lg-10">
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="1" ng-checked="parameter.paramType==1"  ng-click="parameter.paramType=1"> KEY-VALUE类型 </label>
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="2" ng-checked="parameter.paramType==2"  ng-click="parameter.paramType=2"> SQL类型 </label>
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="3" ng-checked="parameter.paramType==3"  ng-click="parameter.paramType=3"> 测试用例类型 </label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-12"><div class="hr-line-dashed" style="border-top: 1px dashed lightgray;"></div></div>
+                                            <div ng-show="parameter.paramType==1">
+                                                <div class="form-group">
+                                                    <label class="col-lg-2 control-label">VALUE值</label>
+                                                    <div class="col-lg-10">
+                                                        <input class="form-control" ng-model="parameter.kvVal"/>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div ng-show="parameter.paramType==2">
+                                                <div class="form-group" >
+                                                    <label class="col-lg-2 control-label">数据库名</label>
+                                                    <div class="col-lg-6">
+                                                        <select class="select2_db form-control">
+                                                            <option value="0">-- 选择 --</option>
+                                                            <option value="{{db.id}}" ng-repeat="db in dbList">{{db.name}}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <label class="control-label text-navy"><a href="db.html" target="_blank"><i class="fa fa-database"> 数据库维护</i></a></label>
+                                                        <label class="control-label text-navy m-l"><a ng-click="getAllDb()"><i class="fa fa-refresh"></i></a></label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" >
+                                                    <label class="col-lg-2 control-label">SQL语句</label>
+                                                    <div class="col-lg-10">
+                                                        <textarea rows="5" class="form-control" ng-model="parameter.dbSql"></textarea>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" >
+                                                    <label class="col-lg-2 control-label">取用的列名</label>
+                                                    <div class="col-lg-10">
+                                                        <input class="form-control" ng-model="parameter.dbColumn"/>
+                                                        <small><i class="fa fa-info-circle text-muted"> 只能填写一个列名</i></small>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group" >
+                                                    <label class="col-lg-2 control-label">结果获取方式</label>
+                                                    <div class="col-lg-10">
+                                                        <label class="checkbox-inline"><input type="radio" name="optionsRadios3" value="111" ng-checked="parameter.dbGetValType==1"  ng-click="parameter.dbGetValType=1"> 第一行 </label>
+                                                        <label class="checkbox-inline"><input type="radio" name="optionsRadios3" value="222" ng-checked="parameter.dbGetValType==2"  ng-click="parameter.dbGetValType=2"> 最后一行 </label>
+                                                        <label class="checkbox-inline"><input type="radio" name="optionsRadios3" value="333" ng-checked="parameter.dbGetValType==3"  ng-click="parameter.dbGetValType=3"> 随机行 </label>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div ng-show="parameter.paramType==3">
+                                                <div class="form-group" >
+                                                    <label class="col-lg-2 control-label">选择用例</label>
+                                                    <div class="col-lg-6">
+                                                        <select class="select2_case form-control">
+                                                            <option value="0">-- 选择 --</option>
+                                                            <option value="{{case.id}}" ng-repeat="case in caseList">{{case.note}}</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="col-lg-4">
+                                                        <label class="control-label text-navy"><a href="case.html" target="_blank"><i class="fa fa-suitcase"> 用例维护</i></a></label>
+                                                        <label class="control-label text-navy m-l"><a ng-click="getAllCase()"><i class="fa fa-refresh"></i></a></label>
+                                                    </div>
+                                                </div>
+                                                <div class="form-group">
+                                                    <label class="col-lg-2 control-label">取值</label>
+                                                    <div class="col-lg-10">
+                                                        <label class="control-label yatWrap"><i class="fa fa-info-circle text-muted"> 选择的用例中如果带数据池，只会执行最后一条数据；参数名或取值方式不填，都无法取值；多个取值方式，仅靠左的有效；</i></label>
+                                                        <table class="table table-bordered">
+                                                            <thead>
+                                                            <tr>
+                                                                <th>参数名</th>
+                                                                <th>响应HeaderName</th>
+                                                                <th>响应CookieName</th>
+                                                                <th>JsonPath</th>
+                                                            </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                            <tr>
+                                                                <td style="padding: 1px;" align="center" valign="center">{{parameter.name}}</td>
+                                                                <td style="padding: 1px"><input type="text" class="form-control" ng-model="parameter.tcHeader" /></td>
+                                                                <td style="padding: 1px"><input type="text" class="form-control" ng-model="parameter.tcCookie" /></td>
+                                                                <td style="padding: 1px"><input type="text" class="form-control" ng-model="parameter.tcJsonPath" /></td>
+                                                            </tr>
+                                                            </tbody>
+                                                        </table>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                                <div class="ibox-footer">
+                                    <div class="row" ng-show="parameter.paramType==2 || parameter.paramType==3">
+                                        <div class="col-lg-12">
+                                            <button class="form-control" ng-click="debug()"><i class="fa fa-caret-square-o-right text-success"> 测试一下</i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="right-sidebar">
+                    <div class="sidebar-container">
+                        <ul class="nav nav-tabs navs-1">
+                            <li class="active"><a data-toggle="tab" href="index.html#tab-1">调试日志</a></li>
+                        </ul>
+                        <div class="tab-content">
+                            <div id="tab-1" class="tab-pane active">
+                                <div class="sidebar-title">
+                                    <h3> <i class="fa fa-comments-o"></i>
+                                        <span>调试结果</span>
+                                        <div class="pull-right">
+                                            <button type="button" class="btn btn-sm btn-danger"  ng-click="rightSidebar(false)"><i class="fa fa-close"> 关闭</i></button>
+                                        </div>
+                                    </h3>
+                                    <small class="text-danger"><i class="fa fa-tim"></i></small>
+                                    <small class="text-navy"><i class="fa fa-tim"></i></small>
+                                </div>
+                                <div>
+                                    <p class="text-success m-l m-t"><strong>{{debugData}}</strong></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="footer" ng-include="footer.html"></div>
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Flot -->
+    <script src="js/plugins/flot/jquery.flot.js"></script>
+    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
+
+    <!-- ChartJS-->
+    <script src="js/plugins/chartJs/Chart.min.js"></script>
+
+    <!-- Peity -->
+    <script src="js/plugins/peity/jquery.peity.min.js"></script>
+    <!-- Peity demo -->
+    <script src="js/demo/peity-demo.js"></script>
+    <!-- ztree -->
+    <script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+    <!-- paginator -->
+    <script src="yat-js/bootstrap-paginator.min.js"></script>
+    <!-- Select2 -->
+    <script src="js/plugins/select2/select2.full.min.js"></script>
+    <!-- Date range picker -->
+    <!-- Date range use moment.js same as full calendar plugin -->
+    <script src="js/plugins/fullcalendar/moment.min.js"></script>
+    <script src="js/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <script src="yat-js/ng-app.js"></script>
+    <script src="yat-js/ng-ctrl-navbar.js"></script>
+    <script src="yat-js/ng-ctrl-parameter.js"></script>
+
+    <div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+    </div>
+
+</body>
+
+</html>

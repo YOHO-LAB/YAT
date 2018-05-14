@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation" ng-controller="ng-ctrl-yat">
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg" >
+            <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='TestData'"></div>
+            <div class="wrapper wrapper-content" ng-controller="ng-ctrl-yat-content" style="padding: 15px;">
+                <div class="container-fluid" style="padding-right:0px;padding-left:0px;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>测试团队列表 <small class="m-l-sm">作用域：全局</small></h5>
+                                    <div class="ibox-tools">
+                                        <a class="btn btn-primary btn-xs" data-toggle="modal" data-target="#editModal" ng-click="clickAddTeam()"><i class="fa fa-plus"> 新增团队</i></a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <div class="col-lg-3">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>团队名称</strong></span>
+                                                <input class="form-control" ng-model="s_team_name"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>团队说明</strong></span>
+                                                <input class="form-control" ng-model="s_team_note"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>创建者</strong></span>
+                                                <input class="form-control"  ng-model="s_create_user"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>修改者</strong></span>
+                                                <input class="form-control"  ng-model="s_update_user"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3 m-t-xs">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>创建时间</strong></span>
+                                                <input class="form-control" type="text" name="daterange" ng-model="s_create_time" />
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-3 m-t-xs">
+                                            <div class="input-group">
+                                                <span class="input-group-addon"><strong>修改时间</strong></span>
+                                                <input class="form-control" type="text" name="daterange" ng-model="s_update_time" />
+                                            </div>
+                                        </div>
+
+                                        <div class="col-lg-1 m-t-xs">
+                                                <button class="form-control btn btn-outline btn-primary" ng-click="getTeam()"><i class="fa fa-search"> 搜索</i></button>
+                                        </div>
+
+                                        <div class="col-lg-12 m-t-xs">
+                                            <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div style="text-align: center"><small>总共{{totalPage}}页，当前第{{page}}页</small></div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <table class="table table-hover">
+                                                <thead>
+                                                <tr>
+                                                    <th>团队Id</th><th>团队名称</th><th>团队说明</th>
+                                                    <th>创建者</th><th>创建时间</th><th>修改者</th><th>修改时间</th>
+                                                    <th></th>
+                                                </tr>
+                                                </thead>
+                                                <tbody>
+                                                <tr ng-repeat="tr in teamList">
+                                                    <td>{{tr.id}}</td>
+                                                    <td>{{tr.name}}</td>
+                                                    <td>{{tr.note}}</td>
+                                                    <td>{{tr.addUserNameCn}}</td>
+                                                    <td>{{tr.addTime | timeFilter}}</td>
+                                                    <td>{{tr.updateUserNameCn}}</td>
+                                                    <td>{{tr.updateTime | timeFilter}}</td>
+                                                    <td>
+                                                        <button class="btn btn-xs btn-primary" data-toggle="modal" data-target="#editModal" ng-click="clickModifyTeam(tr)"> 修改</button>
+                                                        <!--<button class="btn btn-xs btn-danger m-l" ng-click="deleteTeam(tr)"> 删除</button>-->
+                                                    </td>
+                                                </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                    </div>
+                                </div>
+                                <div class="ibox-footer">
+                                    <span class="pull-right">
+                                    </span>
+                                    共{{totalCount}}条记录
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="modal inmodal fade" id="editModal" tabindex="-2" role="dialog"  aria-hidden="true" data-backdrop="static">
+                        <div class="modal-dialog ">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                    <h4 class="modal-title">{{editTitle}}</h4>
+                                    <small class="font-bold"></small>
+                                </div>
+                                <div class="modal-body">
+                                    <div class="row">
+                                        <form class="" role="form">
+                                            <div class="form-group">
+                                                <label class="control-label">团队名：</label>
+                                                <div class="">
+                                                    <input type="text" class="form-control" ng-model="teamName"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="control-label">团队说明：</label>
+                                                <div class="">
+                                                    <textarea rows="3" class="form-control" ng-model="teamNote"></textarea>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                <div class="modal-footer">
+                                    <strong class="text-danger pull-left">{{errorInfo}}</strong>
+                                    <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
+                                    <button type="button" class="btn btn-primary" ng-click="addTeam()" ng-show="editButtonAdd">确认新增</button>
+                                    <button type="button" class="btn btn-primary" ng-click="modifyTeam()" ng-show="!editButtonAdd">确认修改</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="footer" ng-include="footer.html"></div>
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Flot -->
+    <script src="js/plugins/flot/jquery.flot.js"></script>
+    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
+
+    <!-- ChartJS-->
+    <script src="js/plugins/chartJs/Chart.min.js"></script>
+
+    <!-- Peity -->
+    <script src="js/plugins/peity/jquery.peity.min.js"></script>
+    <!-- Peity demo -->
+    <script src="js/demo/peity-demo.js"></script>
+    <!-- ztree -->
+    <script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+    <!-- paginator -->
+    <script src="yat-js/bootstrap-paginator.min.js"></script>
+    <!-- Select2 -->
+    <script src="js/plugins/select2/select2.full.min.js"></script>
+    <!-- Date range picker -->
+    <!-- Date range use moment.js same as full calendar plugin -->
+    <script src="js/plugins/fullcalendar/moment.min.js"></script>
+    <script src="js/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <script src="yat-js/ng-app.js"></script>
+    <script src="yat-js/ng-ctrl-navbar.js"></script>
+    <script src="yat-js/ng-ctrl-team.js"></script>
+
+    <div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+    </div>
+
+</body>
+
+</html>

@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/plugins/select2/select2.min.css" rel="stylesheet">
+    <!-- Toastr style -->
+    <link href="css/plugins/toastr/toastr.min.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation" ng-controller="ng-ctrl-yat">
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg" >
+            <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='TestCase'"></div>
+            <div class="wrapper wrapper-content" ng-controller="ng-ctrl-yat-content" style="padding: 15px;">
+                <div class="container-fluid" style="padding-right:0px;padding-left:0px;">
+                    <div class="row">
+                        <div class="col-lg-12">
+                            <div class="ibox collapsed" style="margin-bottom:0px">
+                                <div class="ibox-title">
+                                    <h5>DataSourceLoop 数据驱动 <small> 共 {{ds.tr.length}} 条，用例中可通过${ds.参数名}的方式取值；跳过操作：skip.pre.操作名 为true或者1；跳过校验：填 不校验；去除传参：填 不传参；</small></h5>
+                                    <div class="ibox-tools">
+                                        <a class="collapse-link"><i class="fa fa-chevron-up"></i></a>
+                                    </div>
+                                </div>
+                                <div class="ibox-content no-padding">
+                                    <div class="row">
+                                        <div class="col-lg-2" style="padding-right: 0px">
+                                            <ul class="list-group">
+                                                <li class="list-group-item yatWrap" style="border-right:1px solid #e7eaec;background-color: #F5F5F6">
+                                                    <strong>参数名</strong>
+                                                    <div class="pull-right">
+                                                        <a class="dropdown-toggle" data-toggle="dropdown" href="tabs_panels.html#">
+                                                            <i class="fa fa-wrench"></i>
+                                                        </a>
+                                                        <ul class="dropdown-menu dropdown-user">
+                                                            <li><a ng-click="addDsTh()"><i class="fa fa-plus text-navy"> 新增</i></a></li>
+                                                            <li><a ng-click="delDsTh()"><i class="fa fa-close text-danger"> 删除</i></a></li>
+                                                            <li><a ng-click="editDsTh()"><i class="fa fa-edit text-success"> 编辑</i></a></li>
+                                                            <li><a ng-click="moveDsTh('up')"><i class="fa fa-angle-up "></i> 上移</a></li>
+                                                            <li><a ng-click="moveDsTh('down')"><i class="fa fa-angle-down "> 下移</i></a></li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                                <li class="list-group-item yatWrap" ng-repeat="li in ds.th track by $index" ng-click="clickDsLi($index)" ng-class="{'yatBgInfo':sDsIdx==$index}" style="cursor: pointer;border-right:1px solid #e7eaec">
+                                                    <strong>{{li}}</strong>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                        <div class="col-lg-10" style="padding-left:0px">
+                                            <table class="table table-bordered yatFixedTable" style="margin-bottom:0px">
+                                                <thead><tr><th class="yatWrap">序号</th><th ng-repeat="th in ds.th track by $index" class="yatWrap">{{th}}</th></tr></thead>
+                                                <tbody><tr ng-repeat="tr in ds.tr track by $index">
+                                                    <td class="yatWrap">
+                                                        <a class="btn btn-xs btn-white" style="line-height: 0;padding-top:0px;padding-bottom:0px" ng-click="debugCase($index)" title="单步调试"><i class="fa fa-caret-right text-info" > </i></a>
+                                                        <!--<i class="fa fa-caret-right text-info" ng-click="debugCase($index)" title="单步调试" style="cursor: pointer"> </i>-->
+                                                        {{$index + 1}}
+                                                        <i class="fa fa-minus text-warning" ng-click="delDsTr($index)" title="删除此行" style="cursor: pointer"> </i>
+                                                        <i class="fa fa-angle-up " ng-click="moveDsTr('up',$index)" title="上移" style="cursor: pointer"> </i>
+                                                        <i class="fa fa-angle-down " ng-click="moveDsTr('down',$index)" title="下移" style="cursor: pointer"> </i>
+                                                    </td>
+                                                    <td ng-repeat="td in tr track by $index" class="yatWrap no-padding"><input type="text" class="form-control" ng-model="td.v" /></td>
+                                                </tr></tbody>
+                                            </table>
+                                            <button type="button" class="btn btn-xs btn-default form-control" ng-click="addDsTr()"><i class="fa fa-plus text-navy"> 新增一行</i></button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="showUeEditor">
+                        <div class="col-lg-12">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>URL编辑器 </h5>
+                                    <div class="ibox-tools">
+                                        <button class="btn btn-xs btn-default btn-outline" ng-click="showUeEditor=false"><i class="fa fa-arrow-circle-left"> 取消&返回</i></button>
+                                        <button class="btn btn-xs btn-primary btn-outline" ng-click="ueEnsureAndReturn()"><i class="fa fa-arrow-circle-left"> 确认&返回</i></button>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <form class="form-horizontal">
+                                            <div class="form-group">
+                                                <div class="col-lg-12">
+                                                    <div class="input-group">
+                                                        <div class="input-group-btn">
+                                                            <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button">
+                                                                <span ng-show="!tc.isPost">GET</span><span ng-show="tc.isPost">POST</span>
+                                                                <span class="caret"></span></button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a href="" ng-click="tc.isPost=false">GET</a></li>
+                                                                <li><a href="" ng-click="tc.isPost=true">POST</a></li>
+                                                            </ul>
+                                                            <button class="btn btn-white" type="button"><span>{{tc.testEnvUrl}}</span></button>
+                                                        </div>
+                                                        <input type="text" class="form-control" ng-model="ueUri" placeholder="只填URI,不用带参数"/>
+                                                        <div class="input-group-btn">
+                                                            <button class="btn btn-success" type="button" ng-click="testSubmit()"><span>发送</span></button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="col-lg-6">
+                                                    <div class="tabs-container">
+                                                        <ul class="nav nav-tabs">
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-11"> 头部</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-12"> Cookies</a></li>
+                                                            <li class="" ng-class="{'active':!tc.isPost}"><a data-toggle="tab" href="tabs.html#tab-13"> URL参数</a></li>
+                                                            <li class="" ng-class="{'active':tc.isPost}" ng-show="tc.isPost"><a data-toggle="tab" href="tabs.html#tab-14"> 请求体</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-15"> 提取响应结果</a></li>
+                                                        </ul>
+                                                        <div class="tab-content">
+                                                            <div id="tab-11" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <button class="btn btn-info btn-outline btn-sm" type="button" ng-click="ueModelOpen('header')"><span>导入头部</span></button>
+                                                                    <i class="fa fa-info-circle text-muted"> 名称不能为空</i>
+                                                                    <table class="table table-bordered">
+                                                                        <thead><tr><th>名称</th><th>内容</th><th>操作</th></tr></thead>
+                                                                        <tbody><tr ng-repeat="tr in ueHeaderList">
+                                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.k" ng-change="usOperateTable(true,'header',$index)"/></td>
+                                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.v" ng-change="usOperateTable(true,'header',$index)"/></td>
+                                                                            <td style="padding: 1px"><button class="btn btn-white btn-outline" type="button" ng-click="usOperateTable(false,'header',$index)" ng-show="$index<ueHeaderList.length-1"><i class="fa fa-trash"></i></button></td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-12" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <button class="btn btn-info btn-outline btn-sm" type="button" ng-click="ueModelOpen('cookie')"><span>导入Cookies</span></button>
+                                                                    <i class="fa fa-info-circle text-muted"> 名称不能为空</i>
+                                                                    <table class="table table-bordered">
+                                                                        <thead><tr><th>名称</th><th>内容</th><th>操作</th></tr></thead>
+                                                                        <tbody><tr ng-repeat="tr in ueCookieList">
+                                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.k" ng-change="usOperateTable(true,'cookie',$index)"/></td>
+                                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.v" ng-change="usOperateTable(true,'cookie',$index)"/></td>
+                                                                            <td style="padding: 1px"><button class="btn btn-white btn-outline" type="button" ng-click="usOperateTable(false,'cookie',$index)" ng-show="$index<ueCookieList.length-1"><i class="fa fa-trash"></i></button></td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-13" class="tab-pane" ng-class="{'active':!tc.isPost}">
+                                                                <div class="panel-body">
+                                                                    <button class="btn btn-info btn-outline btn-sm" type="button" ng-click="ueModelOpen('urlParam')"><span>导入GET参数</span></button>
+                                                                    <i class="fa fa-info-circle text-muted"> 参数名不能为空；自动验签需要填写udid参数；</i>
+                                                                    <table class="table table-bordered">
+                                                                        <thead><tr><th>参数名</th><th>参数值</th><th>操作</th></tr></thead>
+                                                                        <tbody><tr ng-repeat="tr in ueUrlParamList">
+                                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.k" ng-change="usOperateTable(true,'urlParam',$index)"/></td>
+                                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.v" ng-change="usOperateTable(true,'urlParam',$index)"/></td>
+                                                                            <td style="padding: 1px"><button class="btn btn-white btn-outline" type="button" ng-click="usOperateTable(false,'urlParam',$index)" ng-show="$index<ueUrlParamList.length-1"><i class="fa fa-trash"></i></button></td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-14" class="tab-pane" ng-class="{'active':tc.isPost}" ng-show="tc.isPost">
+                                                                <div class="panel-body">
+                                                                    <div class="btn-group">
+                                                                        <button class="btn" ng-class="{true:'btn-primary',false:'btn-white'}[ueIsFromData]" ng-click="ueIsFromData=!ueIsFromData" type="button">表单[form-data]</button>
+                                                                        <button class="btn" ng-class="{true:'btn-white',false:'btn-primary'}[ueIsFromData]" ng-click="ueIsFromData=!ueIsFromData" type="button">源数据[raw]</button>
+                                                                    </div>
+                                                                    <button class="btn btn-info btn-outline btn-sm" type="button" ng-click="ueModelOpen('paramData')" ng-show="ueIsFromData"><span>导入表单</span></button>
+                                                                    <i class="fa fa-info-circle text-muted" ng-show="ueIsFromData"> 参数名不能为空；自动验签需要填写udid参数；</i>
+                                                                    <table class="table table-bordered" ng-show="ueIsFromData">
+                                                                        <thead><tr><th>参数名</th><th>参数值</th><th>操作</th></tr></thead>
+                                                                        <tbody><tr ng-repeat="tr in ueParamDataList">
+                                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.k" ng-change="usOperateTable(true,'paramData',$index)"/></td>
+                                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.v" ng-change="usOperateTable(true,'paramData',$index)"/></td>
+                                                                            <td style="padding: 1px"><button class="btn btn-white btn-outline" type="button" ng-click="usOperateTable(false,'paramData',$index)" ng-show="$index<ueParamDataList.length-1"><i class="fa fa-trash"></i></button></td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                    <textarea ng-show="!ueIsFromData" rows="6" class="form-control" ng-model="ueRawData"></textarea>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-15" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <i class="fa fa-info-circle text-muted"> 提取的参数将在测试后操作和后置操作中作为全局变量引用</i>
+                                                                    <table class="table table-bordered">
+                                                                        <thead><tr><th>参数名</th><th>JsonPath</th><th>操作</th></tr></thead>
+                                                                        <tbody><tr ng-repeat="tr in ueGetHttpResList">
+                                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.k" ng-change="usOperateTable(true,'getHttpRes',$index)"/></td>
+                                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.v" ng-change="usOperateTable(true,'getHttpRes',$index)"/></td>
+                                                                            <td style="padding: 1px"><button class="btn btn-white btn-outline" type="button" ng-click="usOperateTable(false,'getHttpRes',$index)" ng-show="$index<ueGetHttpResList.length-1"><i class="fa fa-trash"></i></button></td>
+                                                                        </tr></tbody>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-6">
+                                                    <div class="tabs-container">
+                                                        <ul class="nav nav-tabs">
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-21"> 响应头</a></li>
+                                                            <li class="active"><a data-toggle="tab" href="tabs.html#tab-22"> 响应内容</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-23"> 响应时间</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-24"> 请求头</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-25"> 请求Cookies</a></li>
+                                                            <li class=""><a data-toggle="tab" href="tabs.html#tab-26"> 请求内容</a></li>
+                                                        </ul>
+                                                        <div class="tab-content">
+                                                            <div id="tab-21" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <ul>
+                                                                        <li ng-repeat="li in testHttpData.header" class="yatWrap">{{li.name}}:{{li.value}}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-22" class="tab-pane active">
+                                                                <div class="panel-body">
+                                                                    <pre>{{testHttpData.response | parseJsonFilter}}</pre>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-23" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <strong>{{testHttpData.responseTime}} 毫秒</strong>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-24" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <ul>
+                                                                        <li ng-repeat="li in testHttpData.headersRequest" class="yatWrap">{{li.name}}:{{li.value}}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-25" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <ul>
+                                                                        <li ng-repeat="li in testHttpData.cookie" class="yatWrap">{{li.name}}={{li.value}}</li>
+                                                                    </ul>
+                                                                </div>
+                                                            </div>
+                                                            <div id="tab-26" class="tab-pane">
+                                                                <div class="panel-body">
+                                                                    <p><strong>Request URL:</strong><small class="yatWrap">{{testHttpData.fullUrl}}</small></p>
+                                                                    <p><strong>Request Method:</strong><small>{{testHttpData.fullMethod}}</small></p>
+                                                                    <p><strong>Status Code:</strong>
+                                                                        <i class="fa fa-circle" ng-class="{'text-navy':testHttpData.code>=200&&testHttpData.code<300 , 'text-warning':testHttpData.code>=300&&testHttpData.code<400 , 'text-danger':testHttpData.code>=400}"></i>
+                                                                        <small>{{testHttpData.code}}</small>
+                                                                    </p>
+                                                                    <p><strong>Post Data:</strong><small class="yatWrap">{{testHttpData.fullPostData}}</small></p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+
+
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row" ng-show="!showUeEditor">
+                        <div class="col-lg-12">
+                            <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>用例维护 <strong class="m-l-sm text-success" ng-show="successMsg">{{successMsg}}</strong><strong class="m-l-sm text-danger" ng-show="errorMsg">{{errorMsg}}</strong></h5>
+                                    <div class="ibox-tools">
+                                        <button class="btn btn-xs btn-white" ng-click="openRightSidebar('log')"><i class="fa fa-newspaper-o"> 日志</i></button>
+                                        <button class="btn btn-xs btn-success" ng-click="newCase()"><i class="fa fa-plus"> 新建</i></button>
+                                        <button class="btn btn-xs btn-success" ng-click="copyCase()" ng-disabled="tc.id==0"><i class="fa fa-copyright"> 复制</i></button>
+                                        <button class="btn btn-xs btn-danger" ng-click="delCase()" ng-disabled="tc.id==0"><i class="fa fa-trash"> 删除</i></button>
+                                        <button class="btn btn-xs btn-primary" ng-click="saveCase()"><i class="fa fa-save"> 保存</i></button>
+                                        <button class="btn btn-xs btn-info" ng-click="debugCase(-1)"><i class="fa fa-caret-right"> 调试</i></button>
+                                    </div>
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <form class="form-horizontal">
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">*</strong> 选择团队：</label>
+                                                <div class="col-lg-6">
+                                                    <select class="select2_team form-control">
+                                                        <option value="0">-- 选择 --</option>
+                                                        <option value="{{team.id}}" ng-repeat="team in teamList">{{team.name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <label class="control-label text-navy"><a href="team.html" target="_blank"><i class="fa fa-users"> 团队维护</i></a></label>
+                                                    <label class="control-label text-navy m-l"><a ng-click="getAllTeam()"><i class="fa fa-refresh"></i></a></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">开启每日CI：</label>
+                                                <div class="col-lg-6">
+                                                    <label class="checkbox-inline"><input type="radio" value="1" name="optionsRadios2" ng-checked="tc.status==1"  ng-click="tc.status=1"> 关闭 </label>
+                                                    <label class="checkbox-inline"><input type="radio" value="2" name="optionsRadios2" ng-checked="tc.status==2"  ng-click="tc.status=2"> 开启 </label>
+                                                    <label class="checkbox-inline text-danger" ng-show="tc.status==0"><input type="radio" value="0" name="optionsRadios2" ng-checked="tc.status==0"  ng-click="tc.status=0"> <strong>已删除</strong> </label>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <label class="control-label"><i class="fa fa-info-circle text-muted"> 标记是否要放入每日Jenkins构建测试中</i></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">*</strong> 服务名：</label>
+                                                <div class="col-lg-6">
+                                                    <select class="select2_service form-control">
+                                                        <option value="0">-- 选择 --</option>
+                                                        <option value="{{service.id}}" ng-repeat="service in serviceList">{{service.name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <label class="control-label text-navy"><a href="service.html" target="_blank"><i class="fa fa-list"> 服务名维护</i></a></label>
+                                                    <label class="control-label text-navy m-l"><a ng-click="getAllService()"><i class="fa fa-refresh"></i></a></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">*</strong> 用例名：</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" ng-model="tc.note"/>
+                                                </div>
+                                                <div class="col-lg-4">
+
+                                                </div>
+                                            </div>
+                                            <div class="form-group col-lg-12"><div class="hr-line-dashed" style="border-top: 1px dashed lightgray;"></div></div>
+
+                                            <div class="form-group" >
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">执行顺序：</strong></label>
+                                                <div class="col-lg-6" style="margin-top: 7px">
+                                                    <span class="badge badge-white">1</span>
+                                                    <span class="text-muted">前置操作</span>
+                                                    <i class="fa fa-long-arrow-right"></i>
+                                                    <span class="badge badge-white">2</span>
+                                                    <span class="text-muted">执行测试</span>
+                                                    <i class="fa fa-long-arrow-right"></i>
+                                                    <span class="badge badge-white">3</span>
+                                                    <span class="text-muted">测试后操作</span>
+                                                    <i class="fa fa-long-arrow-right"></i>
+                                                    <span class="badge badge-white">4</span>
+                                                    <span class="text-muted">检查点校验</span>
+                                                    <!--<i class="fa fa-long-arrow-right"></i>-->
+                                                    <i class="fa "></i>
+                                                    <span class="badge badge-white">5</span>
+                                                    <span class="text-muted">后置操作（容错操作）</span>
+                                                </div>
+                                                <div class="col-lg-2" style="margin-top: 7px">
+                                                    <label class="text-navy"><a href="operation.html" target="_blank"><i class="fa fa-th-list"> 操作维护</i></a></label>
+                                                    <label class="text-navy m-l"><a ng-click="getAllOps()"><i class="fa fa-refresh"></i></a></label>
+                                                </div>
+                                                <div class="col-lg-2" style="margin-top: 7px">
+                                                    <label class="text-navy"><a href="parameter.html" target="_blank"><i class="fa fa-paypal"> 参数化维护</i></a></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label text-navy"><span class="badge badge-white">1</span> 前置操作：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="btn-group m-r" ng-repeat="li in preOpsList">
+                                                        <a class="btn btn-sm btn-white text-info" href="operation.html?opId={{li.id}}" target="_blank">{{li.name}}</a>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('pre','left',$index)"><i class="fa fa-chevron-left"></i></button>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('pre','right',$index)"><i class="fa fa-chevron-right"></i> </button>
+                                                        <button class="btn btn-sm btn-white" ng-click="delTag('pre',$index)"><i class="fa fa-close text-danger"></i> </button>
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-white" ng-click="openRightSidebar('pre')"><i class="fa fa-plus text-navy"> 添加操作</i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label text-navy"><span class="badge badge-white">2</span> 执行测试：</label>
+                                                <div class="col-lg-9"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">*</strong> Method：</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" ng-model="tc.method">
+                                                </div>
+                                                <div class="col-lg-2">
+                                                    <label class="control-label"><i class="fa fa-info-circle text-muted"> 接口的Method</i></label>
+                                                </div>
+                                                <div class="col-lg-2">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><strong class="text-danger">*</strong> Url：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="input-group">
+                                                        <p ><strong ng-show="!tc.isPost">GET</strong> <strong ng-show="tc.isPost">POST</strong> <a ng-click="clickOpenUeEditor()" class="btn btn-xs btn-white"><strong class="text-warning">打开URL编辑器</strong></a></p>
+
+                                                        <p class="yatWrap" style="background-color: lightyellow">{{tc.testEnvUrl}}{{tc.url}}</p>
+                                                        <p ng-show="tc.isPost"><strong>POST Data：</strong></p>
+                                                        <p class="yatWrap" ng-show="tc.isPost">{{tc.parameters}}</p>
+                                                        <div class="col-lg-4">
+                                                            <p><strong>Headers：</strong></p>
+                                                            <ul class="unstyled yatWrap">
+                                                                <li ng-repeat="li in headerList">{{li.k}}:{{li.v}}</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-lg-4">
+                                                            <p><strong>Cookies：</strong></p>
+                                                            <ul class="unstyled yatWrap">
+                                                                <li ng-repeat="li in cookieList">{{li.k}}={{li.v}}</li>
+                                                            </ul>
+                                                        </div>
+                                                        <div class="col-lg-4">
+                                                            <p><strong>提取响应：</strong></p>
+                                                            <ul class="unstyled yatWrap">
+                                                                <li ng-repeat="li in getHttpResList">参数名：{{li.k}}，JsonPath：{{li.v}}</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label text-navy"><span class="badge badge-white">3</span> 测试后操作：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="btn-group m-r" ng-repeat="li in afterOpsList">
+                                                        <a class="btn btn-sm btn-white text-info" href="operation.html?opId={{li.id}}" target="_blank">{{li.name}}</a>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('after','left',$index)"><i class="fa fa-chevron-left"></i></button>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('after','right',$index)"><i class="fa fa-chevron-right"></i> </button>
+                                                        <button class="btn btn-sm btn-white" ng-click="delTag('after',$index)"><i class="fa fa-close text-danger"></i> </button>
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-white" ng-click="openRightSidebar('after')"><i class="fa fa-plus text-navy"> 添加操作</i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label text-navy"><span class="badge badge-white">4</span> 检查点校验：</label>
+                                                <div class="col-lg-9"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">HttpCode检查点：</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" ng-model="tc.httpCodeCheck"/>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">包含检查点：</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" ng-model="tc.containCheck"/>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">不包含检查点：</label>
+                                                <div class="col-lg-6">
+                                                    <input type="text" class="form-control" ng-model="tc.notContainCheck"/>
+                                                </div>
+                                                <div class="col-lg-4"></div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">JsonPath检查点：</label>
+                                                <div class="col-lg-9">
+                                                    <div ng-repeat="li in jsonCheckList track by $index">
+                                                        <div class="input-group">
+                                                            <span class="input-group-addon" style="background-color:darkorchid;color: white" ng-if="li.if!=undefined">If控制器</span>
+                                                            <input type="text" placeholder="JsonPath" class="form-control" ng-model="li.k">
+                                                            <span class="input-group-addon" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
+                                                            <input type="text" placeholder="" class="form-control" ng-model="li.v">
+                                                            <span class="input-group-addon btn" ng-click="delCheckPoint('json',$index)"><i class="fa fa-close text-danger"></i></span>
+                                                        </div>
+                                                        <div class="col-lg-12 m-b" style="border:1px solid #e5e6e7">
+                                                            <div ng-if="li.if!=undefined">
+                                                                <div ng-repeat="ifLi in li.if  track by $index">
+                                                                    <div class="input-group m-t">
+                                                                        <input type="text" placeholder="JsonPath" class="form-control" ng-model="ifLi.k">
+                                                                        <span class="input-group-addon" ng-click="openSelectCompareTypeModal(ifLi)">{{ifLi.t}}</span>
+                                                                        <input type="text" placeholder="" class="form-control" ng-model="ifLi.v">
+                                                                        <span class="input-group-addon btn" ng-click="delCheckPoint('json',$parent.$index,true,$index)"><i class="fa fa-close text-danger"></i></span>
+                                                                    </div>
+                                                                </div>
+                                                                <button class="btn btn-sm btn-white m-t" ng-click="addCheckPoint('json',false,$index)"><i class="fa fa-plus" style="color:chocolate"> 添加JsonPath检查点</i></button>
+                                                                <!--<button class="btn btn-sm btn-white" ng-click="addIfController()"><i class="fa fa-plus" style="color:darkorchid"> 添加If控制器</i></button>-->
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-white" ng-click="addCheckPoint('json',false)"><i class="fa fa-plus" style="color:chocolate"> 添加JsonPath检查点</i></button>
+                                                    <button class="btn btn-sm btn-white" ng-click="addCheckPoint('json',true)"><i class="fa fa-plus" style="color:darkorchid"> 添加If控制器</i></button>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">参数检查点：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="input-group m-b" ng-repeat="li in paramCheckList">
+                                                        <input type="text" placeholder="ParamName" class="form-control" ng-model="li.k">
+                                                        <span class="input-group-addon" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
+                                                        <input type="text" placeholder="" class="form-control" ng-model="li.v">
+                                                        <span class="input-group-addon btn" ng-click="delCheckPoint('param',$index)"><i class="fa fa-close text-danger"></i></span>
+                                                    </div>
+                                                    <button class="btn btn-sm btn-white" ng-click="addCheckPoint('param')"><i class="fa fa-plus" style="color:chocolate"> 添加参数检查点</i></button>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label text-navy"><span class="badge badge-white">5</span> 后置操作：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="btn-group m-r" ng-repeat="li in postOpsList">
+                                                        <a class="btn btn-sm btn-white text-info" href="operation.html?opId={{li.id}}" target="_blank">{{li.name}}</a>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('post','left',$index)"><i class="fa fa-chevron-left"></i></button>
+                                                        <button class="btn btn-sm btn-white" ng-click="moveTag('post','right',$index)"><i class="fa fa-chevron-right"></i> </button>
+                                                        <button class="btn btn-sm btn-white" ng-click="delTag('post',$index)"><i class="fa fa-close text-danger"></i> </button>
+                                                    </div>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-white" ng-click="openRightSidebar('post')"><i class="fa fa-plus text-navy"> 添加操作</i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <!---
+                                            <div class="form-group col-lg-12"><div class="hr-line-dashed" style="border-top: 1px dashed lightgray;"></div></div>
+
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"></label>
+                                                <div class="col-lg-9 text-center" >
+
+                                                </div>
+                                            </div>
+                                            -->
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal inmodal fade" id="myModal_compare_type" tabindex="-1" role="dialog"  aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title">检查点 比较方式</h4>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='=='">校验两边数值是否相等，例如 200 == 200.0，1.1 == 1.10,数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='!='">校验两边数值是否不相等，例如 200 != 500，1.1 != -1.1，数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='>'">校验左边 数值是否大于 右边数值，例如 200 > 199，1.1 > 0.1，数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='>='">校验左边 数值是否大于等于 右边数值，例如 200 >= 199，1.1 >= 1.10，数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='<'">校验左边 数值是否小于 右边数值，例如 200 < 500，1.1 < 0.11，数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='<='">校验左边 数值是否小于等于 右边数值，例如 200 <= 500，1.1 <= 1.10，数值类型，转换为Double进行比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='equals'">校验左边 字符串是否等于 右边字符串，例如 abc equals abc，字符串类型比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='!equals'">校验左边 字符串是否不等于 右边字符串，例如 abc !equals cba，字符串类型比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='contains'">校验左边 字符串是否包含 右边字符串，例如 abc contains a，字符串类型比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='!contains'">校验左边 字符串是否不包含 右边字符串，例如 abc !contains d，字符串类型比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length=='">校验左边 字符串长度是否等于 右边字符串长度，例如 abc length== cba，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length!='">校验左边 字符串长度是否不等于 右边字符串长度，例如 abc length!= abcdef，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length>'">校验左边 字符串长度是否大于 右边字符串长度，例如 abc length> ab，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length>='">校验左边 字符串长度是否大于等于 右边字符串长度，例如 abc length>= cba，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length<'">校验左边 字符串长度是否小于 右边字符串长度，例如 abc length< abcd，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='length<='">校验左边 字符串长度是否小于等于 右边字符串长度，例如 abc length<= cba，字符串长度比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size=='">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size== [3,2,1]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size!='">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size!= [3,2]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size>'">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size> [3,2]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size>='">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size>= [3,2,1]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size<'">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size< [3,2,1,0]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='size<='">校验左边List中 元素的个数是否等于 右边数值，例如 [1,2,3] size<= [3,2,1,0]，右边数值需为整数，List类型，转换为JSONArray后，比较size</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='allEquals'">校验左边List中 所有元素是否全部都等于 右边字符串，例如 [1,1,1] allEquals 1，[{"a":"1"},{"a":"1"}] allEquals {"a":"1"}，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='allNotEquals'">校验左边List中 所有元素是否全部都不等于 右边字符串，例如 [2,2,2] allNotEquals 1，[{"a":"2"},{"b":"1"}] allNotEquals {"a":"1"}，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='oneEquals'">校验左边List中 所有元素是否至少有一个等于 右边字符串，例如 [1,1,2] oneEquals 2，[{"a":"1"},{"a":"2"}] oneEquals {"a":"1"}，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='oneNotEquals'">校验左边List中 所有元素是否至少有一个不等于 右边字符串，例如 [1,1,2] oneNotEquals 1，[{"a":"1"},{"a":"2"}] oneNotEquals {"a":"1"}，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='allContains'">校验左边List中 所有元素是否全部都包含 右边字符串，例如 [a1,b1,c1] allContains 1，[{"a":"1","b":"2"},{"a":"1","b":"2"}] allContains "a":"1"，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='allNotContains'">校验左边List中 所有元素是否全部都不包含 右边字符串，例如 [a1,b1,c1] allNotContains 2，[{"a":"1","b":"2"},{"a":"1","b":"2"}] allNotContains "c":"1"，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='oneContains'">校验左边List中 所有元素是否至少有一个包含 右边字符串，例如 [a1,b1,c1] oneContains a1，[{"a":"1","b":"2"},{"a":"1","b":"2"}] oneContains "a":"1"，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='oneNotContains'">校验左边List中 所有元素是否至少有一个不包含 右边字符串，例如 [a1,b1,c1] oneNotContains d1，[{"a":"1","b":"2"},{"a":"1","b":"2"}] oneNotContains "c":"1"，List类型，转换为JSONArray后，循环比较</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='before'">校验左边 日期是否早于 右边日期，例如 2018-04-10 17:43:11 before 2018-04-10 17:43:12，日期类型，转换为Date进行比较,格式化字符串yyyy-MM-dd hh:mm:ss</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='timeEqual'">校验左边 日期是否等于 右边日期，例如 2018-04-10 17:43:11 timeEqual 2018-04-10 17:43:11，日期类型，转换为Date进行比较,格式化字符串yyyy-MM-dd hh:mm:ss</small>
+                                <small class="font-bold" style="color:blue" ng-show="compareType=='after'">校验左边 日期是否晚于 右边日期，例如 2018-04-10 17:43:11 after 2018-04-10 17:43:10，日期类型，转换为Date进行比较,格式化字符串yyyy-MM-dd hh:mm:ss</small>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>数值型</label>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="1" ng-checked="compareType=='=='" ng-click="compareType='=='" /> == </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="2" ng-checked="compareType=='!='" ng-click="compareType='!='" /> != </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="3" ng-checked="compareType=='>'" ng-click="compareType='>'" /> > </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="4" ng-checked="compareType=='>='" ng-click="compareType='>='" /> >= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="5" ng-checked="compareType=='<'" ng-click="compareType='<'" /> < </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="6" ng-checked="compareType=='<='" ng-click="compareType='<='" /> <= </label></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>字符型</label>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="7" ng-checked="compareType=='equals'" ng-click="compareType='equals'" /> equals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="8" ng-checked="compareType=='!equals'" ng-click="compareType='!equals'" /> !equals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="9" ng-checked="compareType=='contains'" ng-click="compareType='contains'" /> contains </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="10" ng-checked="compareType=='!contains'" ng-click="compareType='!contains'" /> !contains </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="11" ng-checked="compareType=='length=='" ng-click="compareType='length=='" /> length== </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="12" ng-checked="compareType=='length!='" ng-click="compareType='length!='" /> length!= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="13" ng-checked="compareType=='length>'" ng-click="compareType='length>'" /> length> </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="14" ng-checked="compareType=='length>='" ng-click="compareType='length>='" /> length>= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="15" ng-checked="compareType=='length<'" ng-click="compareType='length<'" /> length< </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="16" ng-checked="compareType=='length<='" ng-click="compareType='length<='" /> length<= </label></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>List型</label>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="17" ng-checked="compareType=='size=='" ng-click="compareType='size=='" /> size== </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="18" ng-checked="compareType=='size!='" ng-click="compareType='size!='" /> size!= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="19" ng-checked="compareType=='size>'" ng-click="compareType='size>'" /> size> </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="20" ng-checked="compareType=='size>='" ng-click="compareType='size>='" /> size>= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="21" ng-checked="compareType=='size<'" ng-click="compareType='size<'" /> size< </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="22" ng-checked="compareType=='size<='" ng-click="compareType='size<='" /> size<= </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="221" ng-checked="compareType=='allEquals'" ng-click="compareType='allEquals'" /> allEquals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="222" ng-checked="compareType=='allNotEquals'" ng-click="compareType='allNotEquals'" /> allNotEquals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="223" ng-checked="compareType=='oneEquals'" ng-click="compareType='oneEquals'" /> oneEquals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="224" ng-checked="compareType=='oneNotEquals'" ng-click="compareType='oneNotEquals'" /> oneNotEquals </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="225" ng-checked="compareType=='allContains'" ng-click="compareType='allContains'" /> allContains </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="226" ng-checked="compareType=='allNotContains'" ng-click="compareType='allNotContains'" /> allNotContains </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="227" ng-checked="compareType=='oneContains'" ng-click="compareType='oneContains'" /> oneContains </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="228" ng-checked="compareType=='oneNotContains'" ng-click="compareType='oneNotContains'" /> oneNotContains </label></div>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-3">
+                                        <div class="form-group">
+                                            <label>日期型</label>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="23" ng-checked="compareType=='before'" ng-click="compareType='before'" /> before </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="24" ng-checked="compareType=='timeEqual'" ng-click="compareType='timeEqual'" /> timeEqual </label></div>
+                                            <div class="radio"><label><input type="radio" name="toasts" value="25" ng-checked="compareType=='after'" ng-click="compareType='after'" /> after </label></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" ng-click="selectCompareType()">确定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal inmodal fade" id="myModal_urlEditor" tabindex="-1" role="dialog"  aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                                <h4 class="modal-title">{{ueModelName}}</h4>
+                                <small class="font-bold" style="color:blue" ng-show="ueModelType=='header'">以回车符分割<br>例如<br>a:1<br>b:2</small>
+                                <small class="font-bold" style="color:blue" ng-show="ueModelType=='cookie'">以分号分割，例如a=1;b=2</small>
+                                <small class="font-bold" style="color:blue" ng-show="ueModelType=='urlParam'">以&分割，例如a=1&b=2 或者 JSONObject，例如{"appType":"2","app_version":"5.3.1"}</small>
+                                <small class="font-bold" style="color:blue" ng-show="ueModelType=='paramData'">以&分割，例如a=1&b=2 或者 JSONObject，例如{"appType":"2","app_version":"5.3.1"}</small>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <textarea rows="10" class="form-control" ng-model="ueImportData"></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" ng-click="ueModelSave()">导入</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="right-sidebar">
+                    <div class="sidebar-container">
+                        <ul class="nav nav-tabs navs-4">
+                            <li ng-class="{'active':sbType=='pre'}" ng-click="nowTab='pre'"><a data-toggle="tab" href="index.html#tab-1">前置</a></li>
+                            <li ng-class="{'active':sbType=='after'}" ng-click="nowTab='after'"><a data-toggle="tab" href="index.html#tab-1">测试后</a></li>
+                            <li ng-class="{'active':sbType=='post'}" ng-click="nowTab='post'"><a data-toggle="tab" href="index.html#tab-1">后置</a></li>
+                            <li ng-class="{'active':sbType=='log'}" ng-click="nowTab='log'"><a data-toggle="tab" href="index.html#tab-4">日志</a></li>
+                        </ul>
+                        <div class="tab-content ">
+                            <div id="tab-1" class="tab-pane" ng-class="{'active':nowTab=='pre'||nowTab=='after'||nowTab=='post'}">
+                                <div class="sidebar-title">
+                                    <h3> <i class="fa fa-comments-o"></i>
+                                        <span ng-show="nowTab=='pre'">添加前置操作</span>
+                                        <span ng-show="nowTab=='after'">添加测试后操作</span>
+                                        <span ng-show="nowTab=='post'">添加后置操作</span>
+                                        <div class="pull-right">
+                                            <!--<button type="button" class="btn btn-sm btn-danger"  ng-click="rightSidebar(false)"><i class="fa fa-close"> 关闭</i></button>-->
+                                            <button class="btn btn-outline btn-danger dim" type="button" ng-click="rightSidebar(false)"><i class="fa fa-close"> 关闭</i></button>
+                                        </div>
+                                    </h3>
+                                    <small class="text-danger"><i class="fa fa-tim"></i> {{errMsg}}</small>
+                                    <small class="text-navy"><i class="fa fa-tim"></i> {{passMsg}}</small>
+                                </div>
+                                <div>
+                                    <form class="">
+                                        <div class="form-group col-lg-5">
+                                            <label class="control-label"></label>
+                                            <div class="">
+                                                <input class="form-control" ng-model="s_ops_name" placeholder="操作名称"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-lg-5">
+                                            <label class="control-label "></label>
+                                            <div class="">
+                                                <input class="form-control" ng-model="s_ops_note" placeholder="操作说明"/>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-lg-2">
+                                            <label class="control-label "></label>
+                                            <div class="">
+                                                <button class="form-control btn btn-outline btn-primary" ng-click="getOps()"><i class="fa fa-search"> 搜索</i></button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <div class="col-lg-12 m-t-xs">
+                                        <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div style="text-align: center"><small>总共{{totalPage}}页，当前第1页，共{{totalCount}}条记录</small></div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <table class="table table-hover">
+                                            <thead>
+                                            <tr>
+                                                <th>操作名称</th><th>操作说明</th><th></th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr ng-repeat="tr in opsList" style="cursor: pointer" ng-class="{'text-navy': selectedTr.id==tr.id}">
+                                                <td>{{tr.name}}</td>
+                                                <td>{{tr.note}}</td>
+                                                <td><button class="btn btn-xs btn-outline btn-primary" ng-click="addOps(tr)"><i class="fa fa-plus"> 添加</i></button></td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <div class="col-lg-12 text-left text-muted">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="tab-2" class="tab-pane" ng-class="{'active':nowTab=='log'}">
+                                <div class="sidebar-title">
+                                    <h3> <i class="fa fa-bug"></i>
+                                        <span>调试日志</span>
+                                        <div class="pull-right">
+                                            <button class="btn btn-outline btn-primary dim" type="button" ng-click="getDebugLog()"><i class="fa fa-refresh"> 刷新</i></button>
+                                            <button class="btn btn-outline btn-default dim" type="button" ng-click="openReportPage()"><i class="fa fa-external-link"> 新页面打开</i></button>
+                                            <button class="btn btn-outline btn-danger dim" type="button" ng-click="rightSidebar(false)"><i class="fa fa-close"> 关闭</i></button>
+                                        </div>
+                                    </h3>
+                                    <small class="text-danger"><i class="fa fa-tim"></i> {{debugLogError}}</small>
+                                </div>
+                                <div>
+                                    <div class="panel-body">
+                                        <div class="panel-group" id="accordion">
+                                            <div class="panel" ng-repeat="debugLog in debugLogList" ng-class="{'running':'panel-default','pass':'panel-primary','skip':'panel-warning','fail':'panel-danger',}[debugLog.status]">
+                                                <div class="panel-heading">
+                                                    <h5 class="panel-title">
+                                                        <a data-toggle="collapse" data-parent="#accordion" href="case-editor.html#collapse{{$index}}">【{{debugLog.status}}】{{debugLog.caseName}}</a>
+                                                    </h5>
+                                                </div>
+                                                <div id="collapse{{$index}}" class="panel-collapse collapse">
+                                                    <div class="panel-body">
+                                                        <ul class="unstyled " style="padding:0px">
+                                                            <li ng-repeat="li in debugLog.logList" ng-style="li.style" class="yatWrap">
+                                                                <span >[{{li.time}}]【{{li.title}}】：</span><span ng-show="li.title!='完成HTTP请求'">{{li.content}}</span>
+                                                                <pre ng-show="li.title=='完成HTTP请求'">{{li.content | preJsonFilter:li.title}}</pre>
+                                                            </li>
+                                                        </ul>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+
+
+
+
+
+
+                                    <!--<ul class="unstyled m-r">-->
+                                        <!--<li ng-repeat="li in debugLogList" ng-style="li.style" class="yatWrap">-->
+                                            <!--<span >[{{li.time}}]【{{li.title}}】：</span><span ng-show="li.title!='完成HTTP请求'">{{li.content}}</span>-->
+                                            <!--<pre ng-show="li.title=='完成HTTP请求'">{{li.content | preJsonFilter:li.title}}</pre>-->
+                                        <!--</li>-->
+                                    <!--</ul>-->
+                                    <button type="button" class="btn btn-xs btn-default form-control"  ng-click="getDebugLog()"><i class="fa fa-refresh text-navy"> 刷新</i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="footer" ng-include="footer.html"></div>
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/jquery-ui-1.10.4.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Flot -->
+    <script src="js/plugins/flot/jquery.flot.js"></script>
+    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
+
+    <!-- ChartJS-->
+    <script src="js/plugins/chartJs/Chart.min.js"></script>
+
+    <!-- Peity -->
+    <script src="js/plugins/peity/jquery.peity.min.js"></script>
+    <!-- Peity demo -->
+    <script src="js/demo/peity-demo.js"></script>
+    <!-- ztree -->
+    <script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+    <!-- paginator -->
+    <script src="yat-js/bootstrap-paginator.min.js"></script>
+    <!-- Select2 -->
+    <script src="js/plugins/select2/select2.full.min.js"></script>
+
+    <script src="yat-js/ng-app.js"></script>
+    <script src="yat-js/ng-ctrl-navbar.js"></script>
+    <script src="yat-js/ng-ctrl-case-editor.js"></script>
+
+    <div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+    </div>
+
+</body>
+
+</html>

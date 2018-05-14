@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- 开启注解 -->
+    <mvc:annotation-driven />
+    
+    <!--指明 controller 所在包，并扫描其中的注解-->
+    <context:component-scan base-package="cn.yat.controller"/>
+
+    <!-- 扫描配置属性文件 -->
+    <context:property-placeholder location="classpath*:*.properties" />
+
+    <!-- 静态资源(js、image等)的访问 -->
+    <mvc:default-servlet-handler/>
+    <mvc:resources mapping="/pages/js/**" location="/res/inspinia/js/" />
+    <mvc:resources mapping="/pages/css/**" location="/res/inspinia/css/" />
+    <mvc:resources mapping="/pages/img/**" location="/res/inspinia/img/" />
+    <mvc:resources mapping="/pages/font-awesome/**" location="/res/inspinia/font-awesome/" />
+    <mvc:resources mapping="/pages/**" location="/res/" />
+
+	<bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+	        <!-- Example: a logical view name of 'showMessage' is mapped to '/WEB-INF/jsp/showMessage.jsp' -->
+	        <property name="prefix" value="/WEB-INF/view/"/>
+	        <property name="suffix" value=".jsp"/>
+	</bean>
+</beans>

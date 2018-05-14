@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.yat.mapper.DataSourceLoopMapper" >
+  <resultMap id="BaseResultMap" type="cn.yat.entity.DataSourceLoop" >
+    <id column="case_id" property="caseId" jdbcType="INTEGER" />
+    <result column="th_list" property="thList" jdbcType="VARCHAR" />
+    <result column="tr_list" property="trList" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    case_id, th_list, tr_list
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.DataSourceLoopExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from data_source_loop
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from data_source_loop
+    where case_id = #{caseId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from data_source_loop
+    where case_id = #{caseId,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.yat.entity.DataSourceLoopExample" >
+    delete from data_source_loop
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.yat.entity.DataSourceLoop" >
+    insert into data_source_loop (case_id, th_list, tr_list
+      )
+    values (#{caseId,jdbcType=INTEGER}, #{thList,jdbcType=VARCHAR}, #{trList,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="cn.yat.entity.DataSourceLoop" >
+    insert into data_source_loop
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="caseId != null" >
+        case_id,
+      </if>
+      <if test="thList != null" >
+        th_list,
+      </if>
+      <if test="trList != null" >
+        tr_list,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="caseId != null" >
+        #{caseId,jdbcType=INTEGER},
+      </if>
+      <if test="thList != null" >
+        #{thList,jdbcType=VARCHAR},
+      </if>
+      <if test="trList != null" >
+        #{trList,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.yat.entity.DataSourceLoopExample" resultType="java.lang.Integer" >
+    select count(*) from data_source_loop
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update data_source_loop
+    <set >
+      <if test="record.caseId != null" >
+        case_id = #{record.caseId,jdbcType=INTEGER},
+      </if>
+      <if test="record.thList != null" >
+        th_list = #{record.thList,jdbcType=VARCHAR},
+      </if>
+      <if test="record.trList != null" >
+        tr_list = #{record.trList,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update data_source_loop
+    set case_id = #{record.caseId,jdbcType=INTEGER},
+      th_list = #{record.thList,jdbcType=VARCHAR},
+      tr_list = #{record.trList,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.yat.entity.DataSourceLoop" >
+    update data_source_loop
+    <set >
+      <if test="thList != null" >
+        th_list = #{thList,jdbcType=VARCHAR},
+      </if>
+      <if test="trList != null" >
+        tr_list = #{trList,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where case_id = #{caseId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.yat.entity.DataSourceLoop" >
+    update data_source_loop
+    set th_list = #{thList,jdbcType=VARCHAR},
+      tr_list = #{trList,jdbcType=VARCHAR}
+    where case_id = #{caseId,jdbcType=INTEGER}
+  </update>
+</mapper>

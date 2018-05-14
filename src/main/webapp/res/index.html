@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation" ng-controller="ng-ctrl-yat">
+
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg" >
+        <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='Summary'"></div>
+        <div class="wrapper wrapper-content" ng-controller="ng-ctrl-yat-content">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-8">
+                        <h1 class="m-b-xs">
+                            {{caseTotal}}
+                        </h1>
+                        <strong>
+                            用例总数
+                        </strong>
+                        <div id="sparkline1" class="m-b-sm"></div>
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <small class="stats-label">本月增长量</small>
+                                <h4>{{caseIncrease}}</h4>
+                            </div>
+
+                            <div class="col-xs-4">
+                                <small class="stats-label">% CI用例占比</small>
+                                <h4>{{caseCiPercent}}%</h4>
+                            </div>
+                            <div class="col-xs-4">
+                                <small class="stats-label">CI用例数</small>
+                                <h4>{{caseCi}}</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="row m-t-xs">
+                            <div class="col-xs-12">
+                                <h5 class="m-b-xs">近5次CI</h5>
+                            </div>
+                        </div>
+
+                        <table class="table small m-t-sm">
+                            <tbody>
+                            <tr ng-repeat="tr in lastFiveCiList track by $index">
+                                <td><a href="report.html?reportId={{tr.id}}" target="_blank">{{tr.id}}:{{tr.name}}</ahref></td>
+                                <td>{{tr.startTime | timeFilter}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="small pull-left col-md-3 m-l-lg m-t-md">
+                            <strong>近期CI成功率：</strong>
+                            <!--<strong>99%</strong> last time-->
+                        </div>
+                        <div class="flot-chart m-b-xl">
+                            <div class="flot-chart-content" id="flot-dashboard5-chart"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+
+                    <div class="col-lg-12">
+                        <div class="ibox float-e-margins">
+                            <div class="ibox-title">
+                                <h5>团队接口用例数统计 </h5>
+                                <h5 class="pull-right">本月CI成功率 </h5>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="table-responsive">
+                                    <table class="table table-striped">
+                                        <thead>
+                                        <tr>
+                                            <th>团队</th>
+                                            <th ng-repeat="th in thList">{{th}}</th>
+                                            <th>共计</th>
+                                            <th>月份</th>
+                                            <th>失败数</th>
+                                            <th>总数</th>
+                                            <th>成功率</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr ng-repeat="tr in trList">
+                                            <td style="color: black">{{tr.name}}</td>
+                                            <td ng-repeat="td in tr.tdList track by $index">{{td}}</td>
+                                            <td style="border-right: 1px dotted lightgray;color:blue">{{tr.total}}</td>
+                                            <td class="">{{tr.nowMonth}}</td>
+                                            <td style="color: crimson">{{tr.failNum}}</td>
+                                            <td class="">{{tr.totalNum}}</td>
+                                            <td style="color: darkmagenta">{{tr.passRateNum}}%</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+        <div class="footer" ng-include="footer.html"></div>
+
+        </div>
+        </div>
+
+
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+    <!-- Flot -->
+    <script src="js/plugins/flot/jquery.flot.js"></script>
+    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="js/plugins/flot/jquery.flot.spline.js"></script>
+    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
+    <script src="js/plugins/flot/jquery.flot.pie.js"></script>
+    <script src="js/plugins/flot/jquery.flot.symbol.js"></script>
+    <script src="js/plugins/flot/jquery.flot.time.js"></script>
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+    <!-- Sparkline -->
+    <script src="js/plugins/sparkline/jquery.sparkline.min.js"></script>
+
+    <!-- Peity -->
+    <script src="js/plugins/peity/jquery.peity.min.js"></script>
+    <!-- Peity demo -->
+    <script src="js/demo/peity-demo.js"></script>
+    <!-- ztree -->
+    <script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+
+
+    <script src="yat-js/ng-app.js"></script>
+    <script src="yat-js/ng-ctrl-navbar.js"></script>
+    <script src="yat-js/ng-ctrl-index.js"></script>
+
+
+    <div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+    </div>
+
+</body>
+
+</html>

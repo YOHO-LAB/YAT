@@ -1,0 +1,495 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.yat.mapper.ParameterMapper" >
+  <resultMap id="BaseResultMap" type="cn.yat.entity.Parameter" >
+    <id column="id" property="id" jdbcType="INTEGER" />
+    <result column="env_id" property="envId" jdbcType="INTEGER" />
+    <result column="name" property="name" jdbcType="VARCHAR" />
+    <result column="note" property="note" jdbcType="VARCHAR" />
+    <result column="param_type" property="paramType" jdbcType="INTEGER" />
+    <result column="add_user_id" property="addUserId" jdbcType="INTEGER" />
+    <result column="add_time" property="addTime" jdbcType="TIMESTAMP" />
+    <result column="update_user_id" property="updateUserId" jdbcType="INTEGER" />
+    <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
+    <result column="kv_val" property="kvVal" jdbcType="VARCHAR" />
+    <result column="db_id" property="dbId" jdbcType="INTEGER" />
+    <result column="db_sql" property="dbSql" jdbcType="VARCHAR" />
+    <result column="db_column" property="dbColumn" jdbcType="VARCHAR" />
+    <result column="db_get_val_type" property="dbGetValType" jdbcType="INTEGER" />
+    <result column="tc_id" property="tcId" jdbcType="INTEGER" />
+    <result column="tc_get_val_type" property="tcGetValType" jdbcType="INTEGER" />
+    <result column="tc_json_path" property="tcJsonPath" jdbcType="VARCHAR" />
+    <result column="tc_json_match_num" property="tcJsonMatchNum" jdbcType="INTEGER" />
+    <result column="tc_left" property="tcLeft" jdbcType="VARCHAR" />
+    <result column="tc_right" property="tcRight" jdbcType="VARCHAR" />
+    <result column="tc_lr_match_num" property="tcLrMatchNum" jdbcType="INTEGER" />
+    <result column="tc_cookie" property="tcCookie" jdbcType="VARCHAR" />
+    <result column="tc_header" property="tcHeader" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Example_Where_Clause" >
+    <where >
+      <foreach collection="oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause" >
+    <where >
+      <foreach collection="example.oredCriteria" item="criteria" separator="or" >
+        <if test="criteria.valid" >
+          <trim prefix="(" suffix=")" prefixOverrides="and" >
+            <foreach collection="criteria.criteria" item="criterion" >
+              <choose >
+                <when test="criterion.noValue" >
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue" >
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue" >
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue" >
+                  and ${criterion.condition}
+                  <foreach collection="criterion.value" item="listItem" open="(" close=")" separator="," >
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List" >
+    id, env_id, name, note, param_type, add_user_id, add_time, update_user_id, update_time, 
+    kv_val, db_id, db_sql, db_column, db_get_val_type, tc_id, tc_get_val_type, tc_json_path, 
+    tc_json_match_num, tc_left, tc_right, tc_lr_match_num, tc_cookie, tc_header
+  </sql>
+  <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.ParameterExample" >
+    select
+    <if test="distinct" >
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from parameter
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null" >
+      order by ${orderByClause}
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from parameter
+    where id = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from parameter
+    where id = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="cn.yat.entity.ParameterExample" >
+    delete from parameter
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="cn.yat.entity.Parameter" >
+    insert into parameter (id, env_id, name, 
+      note, param_type, add_user_id, 
+      add_time, update_user_id, update_time, 
+      kv_val, db_id, db_sql, 
+      db_column, db_get_val_type, tc_id, 
+      tc_get_val_type, tc_json_path, tc_json_match_num, 
+      tc_left, tc_right, tc_lr_match_num, 
+      tc_cookie, tc_header)
+    values (#{id,jdbcType=INTEGER}, #{envId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, 
+      #{note,jdbcType=VARCHAR}, #{paramType,jdbcType=INTEGER}, #{addUserId,jdbcType=INTEGER}, 
+      #{addTime,jdbcType=TIMESTAMP}, #{updateUserId,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, 
+      #{kvVal,jdbcType=VARCHAR}, #{dbId,jdbcType=INTEGER}, #{dbSql,jdbcType=VARCHAR}, 
+      #{dbColumn,jdbcType=VARCHAR}, #{dbGetValType,jdbcType=INTEGER}, #{tcId,jdbcType=INTEGER}, 
+      #{tcGetValType,jdbcType=INTEGER}, #{tcJsonPath,jdbcType=VARCHAR}, #{tcJsonMatchNum,jdbcType=INTEGER}, 
+      #{tcLeft,jdbcType=VARCHAR}, #{tcRight,jdbcType=VARCHAR}, #{tcLrMatchNum,jdbcType=INTEGER}, 
+      #{tcCookie,jdbcType=VARCHAR}, #{tcHeader,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="cn.yat.entity.Parameter" >
+    insert into parameter
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        id,
+      </if>
+      <if test="envId != null" >
+        env_id,
+      </if>
+      <if test="name != null" >
+        name,
+      </if>
+      <if test="note != null" >
+        note,
+      </if>
+      <if test="paramType != null" >
+        param_type,
+      </if>
+      <if test="addUserId != null" >
+        add_user_id,
+      </if>
+      <if test="addTime != null" >
+        add_time,
+      </if>
+      <if test="updateUserId != null" >
+        update_user_id,
+      </if>
+      <if test="updateTime != null" >
+        update_time,
+      </if>
+      <if test="kvVal != null" >
+        kv_val,
+      </if>
+      <if test="dbId != null" >
+        db_id,
+      </if>
+      <if test="dbSql != null" >
+        db_sql,
+      </if>
+      <if test="dbColumn != null" >
+        db_column,
+      </if>
+      <if test="dbGetValType != null" >
+        db_get_val_type,
+      </if>
+      <if test="tcId != null" >
+        tc_id,
+      </if>
+      <if test="tcGetValType != null" >
+        tc_get_val_type,
+      </if>
+      <if test="tcJsonPath != null" >
+        tc_json_path,
+      </if>
+      <if test="tcJsonMatchNum != null" >
+        tc_json_match_num,
+      </if>
+      <if test="tcLeft != null" >
+        tc_left,
+      </if>
+      <if test="tcRight != null" >
+        tc_right,
+      </if>
+      <if test="tcLrMatchNum != null" >
+        tc_lr_match_num,
+      </if>
+      <if test="tcCookie != null" >
+        tc_cookie,
+      </if>
+      <if test="tcHeader != null" >
+        tc_header,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="id != null" >
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="envId != null" >
+        #{envId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="note != null" >
+        #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="paramType != null" >
+        #{paramType,jdbcType=INTEGER},
+      </if>
+      <if test="addUserId != null" >
+        #{addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="addTime != null" >
+        #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null" >
+        #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="kvVal != null" >
+        #{kvVal,jdbcType=VARCHAR},
+      </if>
+      <if test="dbId != null" >
+        #{dbId,jdbcType=INTEGER},
+      </if>
+      <if test="dbSql != null" >
+        #{dbSql,jdbcType=VARCHAR},
+      </if>
+      <if test="dbColumn != null" >
+        #{dbColumn,jdbcType=VARCHAR},
+      </if>
+      <if test="dbGetValType != null" >
+        #{dbGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="tcId != null" >
+        #{tcId,jdbcType=INTEGER},
+      </if>
+      <if test="tcGetValType != null" >
+        #{tcGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="tcJsonPath != null" >
+        #{tcJsonPath,jdbcType=VARCHAR},
+      </if>
+      <if test="tcJsonMatchNum != null" >
+        #{tcJsonMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="tcLeft != null" >
+        #{tcLeft,jdbcType=VARCHAR},
+      </if>
+      <if test="tcRight != null" >
+        #{tcRight,jdbcType=VARCHAR},
+      </if>
+      <if test="tcLrMatchNum != null" >
+        #{tcLrMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="tcCookie != null" >
+        #{tcCookie,jdbcType=VARCHAR},
+      </if>
+      <if test="tcHeader != null" >
+        #{tcHeader,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="cn.yat.entity.ParameterExample" resultType="java.lang.Integer" >
+    select count(*) from parameter
+    <if test="_parameter != null" >
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map" >
+    update parameter
+    <set >
+      <if test="record.id != null" >
+        id = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.envId != null" >
+        env_id = #{record.envId,jdbcType=INTEGER},
+      </if>
+      <if test="record.name != null" >
+        name = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.note != null" >
+        note = #{record.note,jdbcType=VARCHAR},
+      </if>
+      <if test="record.paramType != null" >
+        param_type = #{record.paramType,jdbcType=INTEGER},
+      </if>
+      <if test="record.addUserId != null" >
+        add_user_id = #{record.addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="record.addTime != null" >
+        add_time = #{record.addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.updateUserId != null" >
+        update_user_id = #{record.updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="record.updateTime != null" >
+        update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="record.kvVal != null" >
+        kv_val = #{record.kvVal,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dbId != null" >
+        db_id = #{record.dbId,jdbcType=INTEGER},
+      </if>
+      <if test="record.dbSql != null" >
+        db_sql = #{record.dbSql,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dbColumn != null" >
+        db_column = #{record.dbColumn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.dbGetValType != null" >
+        db_get_val_type = #{record.dbGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcId != null" >
+        tc_id = #{record.tcId,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcGetValType != null" >
+        tc_get_val_type = #{record.tcGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcJsonPath != null" >
+        tc_json_path = #{record.tcJsonPath,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tcJsonMatchNum != null" >
+        tc_json_match_num = #{record.tcJsonMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcLeft != null" >
+        tc_left = #{record.tcLeft,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tcRight != null" >
+        tc_right = #{record.tcRight,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tcLrMatchNum != null" >
+        tc_lr_match_num = #{record.tcLrMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="record.tcCookie != null" >
+        tc_cookie = #{record.tcCookie,jdbcType=VARCHAR},
+      </if>
+      <if test="record.tcHeader != null" >
+        tc_header = #{record.tcHeader,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map" >
+    update parameter
+    set id = #{record.id,jdbcType=INTEGER},
+      env_id = #{record.envId,jdbcType=INTEGER},
+      name = #{record.name,jdbcType=VARCHAR},
+      note = #{record.note,jdbcType=VARCHAR},
+      param_type = #{record.paramType,jdbcType=INTEGER},
+      add_user_id = #{record.addUserId,jdbcType=INTEGER},
+      add_time = #{record.addTime,jdbcType=TIMESTAMP},
+      update_user_id = #{record.updateUserId,jdbcType=INTEGER},
+      update_time = #{record.updateTime,jdbcType=TIMESTAMP},
+      kv_val = #{record.kvVal,jdbcType=VARCHAR},
+      db_id = #{record.dbId,jdbcType=INTEGER},
+      db_sql = #{record.dbSql,jdbcType=VARCHAR},
+      db_column = #{record.dbColumn,jdbcType=VARCHAR},
+      db_get_val_type = #{record.dbGetValType,jdbcType=INTEGER},
+      tc_id = #{record.tcId,jdbcType=INTEGER},
+      tc_get_val_type = #{record.tcGetValType,jdbcType=INTEGER},
+      tc_json_path = #{record.tcJsonPath,jdbcType=VARCHAR},
+      tc_json_match_num = #{record.tcJsonMatchNum,jdbcType=INTEGER},
+      tc_left = #{record.tcLeft,jdbcType=VARCHAR},
+      tc_right = #{record.tcRight,jdbcType=VARCHAR},
+      tc_lr_match_num = #{record.tcLrMatchNum,jdbcType=INTEGER},
+      tc_cookie = #{record.tcCookie,jdbcType=VARCHAR},
+      tc_header = #{record.tcHeader,jdbcType=VARCHAR}
+    <if test="_parameter != null" >
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="cn.yat.entity.Parameter" >
+    update parameter
+    <set >
+      <if test="envId != null" >
+        env_id = #{envId,jdbcType=INTEGER},
+      </if>
+      <if test="name != null" >
+        name = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="note != null" >
+        note = #{note,jdbcType=VARCHAR},
+      </if>
+      <if test="paramType != null" >
+        param_type = #{paramType,jdbcType=INTEGER},
+      </if>
+      <if test="addUserId != null" >
+        add_user_id = #{addUserId,jdbcType=INTEGER},
+      </if>
+      <if test="addTime != null" >
+        add_time = #{addTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="updateUserId != null" >
+        update_user_id = #{updateUserId,jdbcType=INTEGER},
+      </if>
+      <if test="updateTime != null" >
+        update_time = #{updateTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="kvVal != null" >
+        kv_val = #{kvVal,jdbcType=VARCHAR},
+      </if>
+      <if test="dbId != null" >
+        db_id = #{dbId,jdbcType=INTEGER},
+      </if>
+      <if test="dbSql != null" >
+        db_sql = #{dbSql,jdbcType=VARCHAR},
+      </if>
+      <if test="dbColumn != null" >
+        db_column = #{dbColumn,jdbcType=VARCHAR},
+      </if>
+      <if test="dbGetValType != null" >
+        db_get_val_type = #{dbGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="tcId != null" >
+        tc_id = #{tcId,jdbcType=INTEGER},
+      </if>
+      <if test="tcGetValType != null" >
+        tc_get_val_type = #{tcGetValType,jdbcType=INTEGER},
+      </if>
+      <if test="tcJsonPath != null" >
+        tc_json_path = #{tcJsonPath,jdbcType=VARCHAR},
+      </if>
+      <if test="tcJsonMatchNum != null" >
+        tc_json_match_num = #{tcJsonMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="tcLeft != null" >
+        tc_left = #{tcLeft,jdbcType=VARCHAR},
+      </if>
+      <if test="tcRight != null" >
+        tc_right = #{tcRight,jdbcType=VARCHAR},
+      </if>
+      <if test="tcLrMatchNum != null" >
+        tc_lr_match_num = #{tcLrMatchNum,jdbcType=INTEGER},
+      </if>
+      <if test="tcCookie != null" >
+        tc_cookie = #{tcCookie,jdbcType=VARCHAR},
+      </if>
+      <if test="tcHeader != null" >
+        tc_header = #{tcHeader,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="cn.yat.entity.Parameter" >
+    update parameter
+    set env_id = #{envId,jdbcType=INTEGER},
+      name = #{name,jdbcType=VARCHAR},
+      note = #{note,jdbcType=VARCHAR},
+      param_type = #{paramType,jdbcType=INTEGER},
+      add_user_id = #{addUserId,jdbcType=INTEGER},
+      add_time = #{addTime,jdbcType=TIMESTAMP},
+      update_user_id = #{updateUserId,jdbcType=INTEGER},
+      update_time = #{updateTime,jdbcType=TIMESTAMP},
+      kv_val = #{kvVal,jdbcType=VARCHAR},
+      db_id = #{dbId,jdbcType=INTEGER},
+      db_sql = #{dbSql,jdbcType=VARCHAR},
+      db_column = #{dbColumn,jdbcType=VARCHAR},
+      db_get_val_type = #{dbGetValType,jdbcType=INTEGER},
+      tc_id = #{tcId,jdbcType=INTEGER},
+      tc_get_val_type = #{tcGetValType,jdbcType=INTEGER},
+      tc_json_path = #{tcJsonPath,jdbcType=VARCHAR},
+      tc_json_match_num = #{tcJsonMatchNum,jdbcType=INTEGER},
+      tc_left = #{tcLeft,jdbcType=VARCHAR},
+      tc_right = #{tcRight,jdbcType=VARCHAR},
+      tc_lr_match_num = #{tcLrMatchNum,jdbcType=INTEGER},
+      tc_cookie = #{tcCookie,jdbcType=VARCHAR},
+      tc_header = #{tcHeader,jdbcType=VARCHAR}
+    where id = #{id,jdbcType=INTEGER}
+  </update>
+</mapper>

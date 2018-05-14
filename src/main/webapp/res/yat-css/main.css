@@ -1,0 +1,26 @@
+/* file upload */
+.my-drop-zone {
+    border: dotted 3px lightgray;
+    height: 200px
+}
+.nv-file-over {
+    border: dotted 3px red;
+}
+.another-file-over-class {
+    border: dotted 3px green;
+}
+
+
+.yatWrap {
+    word-wrap:break-word;
+    word-break:break-all;
+}
+
+.yatBgInfo {
+    background-color : #d9edf7;
+    border-color : #bce8f1;
+}
+
+.yatFixedTable{
+    table-layout : fixed;
+}

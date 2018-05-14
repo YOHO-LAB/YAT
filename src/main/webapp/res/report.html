@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/ambiance.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation fixed-sidebar no-skin-config full-height-layout" ng-controller="ng-ctrl-yat">
+    <div id="wrapper">
+        <div id="page-wrapper" class="gray-bg" >
+            <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='TestReport'"></div>
+            <div ng-controller="ng-ctrl-yat-content">
+                <div class="row wrapper border-bottom white-bg page-heading">
+                    <div class="col-lg-12">
+                        <h2>{{reportSummary.name}}
+                            <ul class="tag-list pull-right" style="padding: 0">
+                                <li class="text-navy"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.passRate" ng-click="clickTag('passRate')"> <strong>成功率 {{reportPassRate}}%</strong></a></li>
+                                <li class="text-success"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.pass" ng-click="clickTag('pass')"> <strong>成功 {{reportPass}}</strong></a></li>
+                                <li class="text-warning"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.skip" ng-click="clickTag('skip')"> <strong>跳过 {{reportSkip}}</strong></a></li>
+                                <li class="text-danger"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.fail" ng-click="clickTag('fail')"> <strong>失败 {{reportFail}}</strong></a></li>
+                                <li class="text-info"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.total" ng-click="clickTag('total')"> <strong>用例总数 {{reportTotal}}</strong></a></li>
+                            </ul>
+                        </h2>
+
+                        <ol class="breadcrumb">
+                            <li>{{reportSummary.startTime | timeFilter}}</li>
+                            <li>{{reportSummary.endTime | timeFilter}}</li>
+                            <li>{{reportSummary.startTime | durationFilter:reportSummary.startTime:reportSummary.endTime}}</li>
+                            <li>{{reportUserName}}</li>
+                        </ol>
+                    </div>
+                </div>
+                <div class="fh-breadcrumb">
+                    <div class="fh-column">
+                        <div class="scroll_content">
+                            <input class="form-control" type="text" placeholder="filter" ng-model="filterName"/>
+                            <ul class="list-group elements-list">
+                                <li class="list-group-item" style="cursor: pointer" ng-repeat="li in reportLog | caseNameFilter : filterName : sTag" ng-click="clickLi(li)" ng-class="{'active':sLi.l==li.l}">
+                                    <small class="pull-right text-muted"> {{li.h}}ms</small>
+                                    <strong ng-class="{'text-navy':li.p==1,'text-warning':li.s==1,'text-danger':li.f==1}">{{li.caseName}}</strong>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="full-height">
+                        <div class="scroll_content white-bg border-left">
+                            <div class="element-detail-box">
+                                <div class="tab-content">
+                                    <div id="tab-1" class="tab-pane active">
+                                        <div class="small text-muted">
+                                            <i class="fa fa-clock-o"></i>
+                                            <strong>用例耗时：</strong>{{sLi.t}}ms &nbsp;&nbsp;&nbsp;&nbsp;
+                                            <strong>Http请求耗时：</strong>{{sLi.h}}ms
+                                        </div>
+                                        <h1><a href="case-editor.html?caseId={{sLi.caseId}}" target="_blank">{{sLi.caseName}}</a></h1>
+                                        <ul class="unstyled m-r">
+                                            <li ng-repeat="li in logDetailArr" ng-style="li.style" class="yatWrap">
+                                                <span >[{{li.time}}]【{{li.title}}】：</span>
+                                                <span ng-show="li.title!='完成HTTP请求'">{{li.content}}</span>
+                                                <pre ng-show="li.title=='完成HTTP请求'">{{li.content | preJsonFilter:li.title}}</pre>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="footer" ng-include="footer.html"></div>
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="js/jquery-2.1.1.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+    <script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+    <!-- Custom and plugin javascript -->
+    <script src="js/inspinia.js"></script>
+    <script src="js/plugins/pace/pace.min.js"></script>
+
+    <!-- Flot -->
+    <script src="js/plugins/flot/jquery.flot.js"></script>
+    <script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+    <script src="js/plugins/flot/jquery.flot.resize.js"></script>
+
+    <!-- ChartJS-->
+    <script src="js/plugins/chartJs/Chart.min.js"></script>
+
+    <!-- Peity -->
+    <script src="js/plugins/peity/jquery.peity.min.js"></script>
+    <!-- Peity demo -->
+    <script src="js/demo/peity-demo.js"></script>
+    <!-- ztree -->
+    <script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+    <!-- paginator -->
+    <script src="yat-js/bootstrap-paginator.min.js"></script>
+    <!-- Select2 -->
+    <script src="js/plugins/select2/select2.full.min.js"></script>
+    <!-- Date range picker -->
+    <!-- Date range use moment.js same as full calendar plugin -->
+    <script src="js/plugins/fullcalendar/moment.min.js"></script>
+    <script src="js/plugins/daterangepicker/daterangepicker.js"></script>
+
+    <script src="yat-js/ng-app.js"></script>
+    <script src="yat-js/ng-ctrl-navbar.js"></script>
+    <script src="yat-js/ng-ctrl-report.js"></script>
+
+    <div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+        <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+    </div>
+
+</body>
+
+</html>

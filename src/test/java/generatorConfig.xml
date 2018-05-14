@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration >
+  <classPathEntry location="E:\maven\repository\mysql\mysql-connector-java\5.1.34\mysql-connector-java-5.1.34.jar" />
+  <context id="context1" >
+   <commentGenerator>
+  		<property name="suppressAllComments" value="true"/>  
+    </commentGenerator>
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.104.28:3306/yat" userId="yat" password="aA@123456" />
+    <javaModelGenerator targetPackage="cn.yat.entity" targetProject="src/main/java" />
+    <sqlMapGenerator targetPackage="cn.yat.mapper" targetProject="src/main/java" />
+    <javaClientGenerator targetPackage="cn.yat.mapper" targetProject="src/main/java" type="XMLMAPPER" />
+      <table schema="yat" tableName="user" ></table>
+      <table schema="yat" tableName="team" ></table>
+      <table schema="yat" tableName="feedback" ></table>
+      <table schema="yat" tableName="testcase" ></table>
+      <table schema="yat" tableName="service" ></table>
+      <table schema="yat" tableName="record" ></table>
+      <table schema="yat" tableName="environment" ></table>
+      <table schema="yat" tableName="parameter" ></table>
+      <table schema="yat" tableName="db" ></table>
+      <table schema="yat" tableName="operation" ></table>
+      <table schema="yat" tableName="run_summary" >
+          <columnOverride column="log" jdbcType="VARCHAR" />
+      </table>
+      <table schema="yat" tableName="data_source_loop" >
+          <columnOverride column="tr_list" jdbcType="VARCHAR" />
+      </table>
+      <table schema="yat" tableName="project" ></table>
+      <table schema="yat" tableName="bsh_java_code" >
+          <columnOverride column="code" jdbcType="VARCHAR" />
+      </table>
+  </context>
+</generatorConfiguration>

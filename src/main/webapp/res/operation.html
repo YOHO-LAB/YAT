@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html ng-app="ng-app-yat">
+
+<head>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>YAT自动化测试平台</title>
+
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="font-awesome/css/font-awesome.css" rel="stylesheet">
+    <link href="yat-css/zTree.css" rel="stylesheet">
+    <link href="css/plugins/select2/select2.min.css" rel="stylesheet">
+    <link href="css/plugins/daterangepicker/daterangepicker-bs3.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/codemirror.css" rel="stylesheet">
+    <link href="css/plugins/codemirror/ambiance.css" rel="stylesheet">
+    <link href="css/animate.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="yat-css/main.css" rel="stylesheet">
+    <link href="yat-img/favicon.ico" rel="shortcut icon">
+    <script src="yat-js/angular.min.js"></script>
+    <script src="yat-js/angular-file-upload.min.js"></script>
+    <script src="yat-js/angular-cookies.min.js"></script>
+</head>
+
+<body class="top-navigation" ng-controller="ng-ctrl-yat">
+<div id="wrapper">
+    <div id="page-wrapper" class="gray-bg" >
+        <div class="row border-bottom white-bg" ng-controller="ng-ctrl-yat-nav" ng-include="'navbar.html'" ng-init="tabName='TestData'"></div>
+        <div class="wrapper wrapper-content no-padding" ng-controller="ng-ctrl-yat-content" style="padding: 15px;">
+            <div class="container-fluid" style="padding-right:0px;padding-left:0px;">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="ibox">
+                            <div class="ibox-title">
+                                <h5 style="margin-bottom:0px">前后置操作列表 <small class="m-l-sm">作用域：环境</small></h5>
+                                <div class="ibox-tools">
+                                    <a class="btn btn-xs" ng-click="openSearchDiv=true"><i class="fa fa-search"> 搜索</i></a>
+                                    <a class="btn btn-primary btn-xs" ng-click="clickAddOps()"><i class="fa fa-plus"> 新增操作</i></a>
+                                </div>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="row">
+                                    <div ng-show="openSearchDiv">
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label class="control-label">操作ID：</label>
+                                                <input class="form-control" ng-model="s_ops_id"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label class="control-label">操作名称：</label>
+                                                <input class="form-control" ng-model="s_ops_name"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12">
+                                            <div class="form-group">
+                                                <label class="control-label">操作说明：</label>
+                                                <input class="form-control" ng-model="s_ops_note"/>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <button class="form-control btn btn-outline btn-warning" ng-click="openSearchDiv=false"><i class="fa fa-search"> 关闭</i></button>
+                                        </div>
+                                        <div class="col-lg-6">
+                                            <button class="form-control btn btn-outline btn-primary" ng-click="getOps()"><i class="fa fa-search"> 搜索</i></button>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-lg-12 m-t-xs">
+                                        <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <div style="text-align: center"><small>总共{{totalPage}}页，当前第{{page}}页</small></div>
+                                    </div>
+                                    <div class="col-lg-12">
+                                        <table class="table table-hover yatFixedTable">
+                                            <thead>
+                                            <tr>
+                                                <th class="yatWrap">操作名称</th><th class="yatWrap">操作说明</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr ng-repeat="tr in opsList" style="cursor: pointer" ng-class="{'text-navy': selectedTr.id==tr.id}" ng-click="clickTr(tr)">
+                                                <td class="yatWrap">{{tr.name}}</td>
+                                                <td class="yatWrap">{{tr.note}}</td>
+                                            </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div class="ibox-footer">
+                                    <span class="pull-right">
+                                    </span>
+                                共{{totalCount}}条记录
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="ibox">
+                            <div class="ibox-title">
+                                <h5>前后置操作维护 <strong class="m-l-sm text-navy" ng-show="successMsg">{{successMsg}}</strong><strong class="m-l-sm text-danger" ng-show="errorMsg">{{errorMsg}}</strong></h5>
+                                <div class="ibox-tools">
+                                    <button class="btn btn-white btn-xs" ng-click="rightSidebar(true)"><i class="fa fa-newspaper-o"> 调试日志</i></button>
+                                    <button class="btn btn-danger btn-xs" ng-click="clickDelOps()" ng-disabled="operation.id==0"><i class="fa fa-trash"> 删除</i></button>
+                                    <button class="btn btn-primary btn-xs" ng-click="clickSaveOps()"><i class="fa fa-save"> 保存</i></button>
+                                </div>
+                            </div>
+                            <div class="ibox-content">
+                                <div class="row">
+                                    <form class="form-horizontal">
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label"></label>
+                                            <div class="col-lg-10">
+                                                <span class="text-muted">在“前置/测试后/后置操作”中，执行操作后，可使用${pre/after/post.param}的形式作为参数进行替换</span>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">操作ID：</label>
+                                            <div class="col-lg-6">
+                                                <input class="form-control" ng-model="operation.id" ng-disabled="true"/>
+                                            </div>
+                                            <div class="col-lg-4">
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">操作名：</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" ng-model="operation.name" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">操作说明：</label>
+                                            <div class="col-lg-10">
+                                                <input class="form-control" ng-model="operation.note" />
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label class="col-lg-2 control-label">操作类型：</label>
+                                            <div class="col-lg-10">
+                                                <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="1" ng-checked="operation.opsType==1"  ng-click="operation.opsType=1"> 执行SQL语句 </label>
+                                                <!-- 暂不支持
+                                                <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="2" ng-checked="operation.opsType==2"  ng-click="operation.opsType=2"> 执行HTTP请求 </label>
+                                                -->
+                                                <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="3" ng-checked="operation.opsType==3"  ng-click="operation.opsType=3"> 执行测试用例 </label>
+                                                <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="4" ng-checked="operation.opsType==4"  ng-click="operation.opsType=4"> 执行Java方法 </label>
+                                                <label class="checkbox-inline"><input type="radio" name="optionsRadios" value="5" ng-checked="operation.opsType==5"  ng-click="operation.opsType=5"> 等待时间 </label>
+                                            </div>
+                                        </div>
+                                        <div class="form-group col-lg-12"><div class="hr-line-dashed" style="border-top: 1px dashed lightgray;"></div></div>
+
+                                        <div ng-show="operation.opsType==1">
+                                            <div class="form-group" >
+                                                <label class="col-lg-2 control-label"></label>
+                                                <div class="col-lg-10">
+                                                    <p class="text-muted"><i class="fa fa-info-circle"> 最多返回10行数据</i></p>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" >
+                                                <label class="col-lg-2 control-label">数据库名</label>
+                                                <div class="col-lg-6">
+                                                    <select class="select2_db form-control">
+                                                        <option value="0">-- 选择 --</option>
+                                                        <option value="{{db.id}}" ng-repeat="db in dbList">{{db.name}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <label class="control-label text-navy"><a href="db.html" target="_blank"><i class="fa fa-database"> 数据库维护</i></a></label>
+                                                    <label class="control-label text-navy m-l"><a ng-click="getAllDb()"><i class="fa fa-refresh"></i></a></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" >
+                                                <label class="col-lg-2 control-label">SQL语句</label>
+                                                <div class="col-lg-10">
+                                                    <textarea rows="5" class="form-control" ng-model="operation.dbSql"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="operation.opsType==2">
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">Url：</label>
+                                                <div class="col-lg-9">
+                                                    <div class="input-group">
+                                                        <div class="input-group-btn">
+                                                            <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button"><span ng-show="!operation.httpIsPost">GET</span><span ng-show="operation.httpIsPost">POST</span> <span class="caret"></span></button>
+                                                            <ul class="dropdown-menu">
+                                                                <li><a href="" ng-click="operation.httpIsPost=false">GET</a></li>
+                                                                <li><a href="" ng-click="operation.httpIsPost='true'">POST</a></li>
+                                                            </ul>
+                                                        </div>
+                                                        <input type="text" class="form-control" ng-model="operation.httpUrl">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="form-group" ng-show="operation.httpIsPost">
+                                                <label class="col-lg-2 control-label">Parameters：</label>
+                                                <div class="col-lg-9">
+                                                    <textarea rows="3" class="form-control" ng-model="operation.httpParam"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="operation.opsType==3">
+                                            <div class="form-group" >
+                                                <label class="col-lg-2 control-label">选择用例</label>
+                                                <div class="col-lg-6">
+                                                    <select class="select2_case form-control">
+                                                        <option value="0">-- 选择 --</option>
+                                                        <option value="{{case.id}}" ng-repeat="case in caseList">{{case.note}}</option>
+                                                    </select>
+                                                </div>
+                                                <div class="col-lg-4">
+                                                    <label class="control-label text-navy"><a href="case.html" target="_blank"><i class="fa fa-suitcase"> 用例维护</i></a></label>
+                                                    <label class="control-label text-navy m-l"><a ng-click="getAllCase()"><i class="fa fa-refresh"></i></a></label>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">取值</label>
+                                                <div class="col-lg-10">
+                                                    <label class="control-label yatWrap"><i class="fa fa-info-circle text-muted"> 选择的用例中如果带数据池，只会执行最后一条数据；参数名或取值方式不填，都无法取值；多个取值方式，仅靠左的有效；</i></label>
+                                                    <table class="table table-bordered">
+                                                        <thead>
+                                                        <tr>
+                                                            <th>参数名</th>
+                                                            <th>响应HeaderName</th>
+                                                            <th>响应CookieName</th>
+                                                            <th>JsonPath</th>
+                                                        </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                        <tr ng-repeat="tr in operation.tcValList">
+                                                            <td style="padding: 1px;"><input type="text" class="form-control" ng-model="tr.p" ng-change="addTcValTr($index)"/></td>
+                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.h" ng-change="addTcValTr($index)"/></td>
+                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.c" ng-change="addTcValTr($index)"/></td>
+                                                            <td style="padding: 1px"><input type="text" class="form-control" ng-model="tr.j" ng-change="addTcValTr($index)"/></td>
+                                                        </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="operation.opsType==4">
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label"><i class="fa fa-info-circle text-muted"></i></label>
+                                                <div class="col-lg-10">
+                                                    <i class="text-muted">参数：以空格分割的一组入参，可以是${}引用参数，参数存储于字符串数组bsh.args[]中</i>
+                                                    <br>
+                                                    <i class="text-muted">java方法：一段可执行的java代码，执行结果可以通过vars.put("","")方法，放入全局变量中</i>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">参数</label>
+                                                <div class="col-lg-10">
+                                                    <input type="text" class="form-control" ng-model="operation.bshArgs"/>
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">Java方法</label>
+                                                <div class="col-lg-10">
+                                                    <textarea id="area-data"></textarea>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div ng-show="operation.opsType==5">
+                                            <div class="form-group">
+                                                <label class="col-lg-2 control-label">等待时间（秒）</label>
+                                                <div class="col-lg-10">
+                                                    <input class="form-control" ng-model="operation.waitTime"/>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="ibox-footer">
+                                <div class="row" ng-show="operation.opsType==1 || operation.opsType==3|| operation.opsType==4">
+                                    <div class="col-lg-12">
+                                        <button class="form-control" ng-click="debug()"><i class="fa fa-caret-square-o-right text-success"> 测试一下</i></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="right-sidebar">
+                <div class="sidebar-container">
+                    <ul class="nav nav-tabs navs-1">
+                        <li class="active"><a data-toggle="tab" href="index.html#tab-1">调试日志</a></li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="tab-1" class="tab-pane active">
+                            <div class="sidebar-title">
+                                <h3> <i class="fa fa-comments-o"></i>
+                                    <span>调试结果</span>
+                                    <div class="pull-right">
+                                        <button type="button" class="btn btn-sm btn-danger"  ng-click="rightSidebar(false)"><i class="fa fa-close"> 关闭</i></button>
+                                    </div>
+                                </h3>
+                                <small class="text-danger"><i class="fa fa-tim"></i></small>
+                                <small class="text-navy"><i class="fa fa-tim"></i></small>
+                            </div>
+                            <div>
+                                <ul class="unstyled">
+                                    <li class="text-info yatWrap" ng-repeat="li in logList">{{li}}</li>
+                                </ul>
+                                <div ng-show="showSqlTable">
+                                    <table class="table table-bordered">
+                                        <thead>
+                                        <tr>
+                                            <th ng-repeat="th in thList">{{th}}</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr ng-repeat="tr in trList">
+                                            <td ng-repeat="td in tr track by $index">{{td}}</td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div ng-show="showTcDiv">
+                                    <div>
+                                        <p><strong>Header:</strong></p>
+                                        <ul class="unstyled">
+                                            <li class="yatWrap" ng-repeat="li in debugTcHeaderList">{{li.k}}:{{li.v}}</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p><strong>Cookie:</strong></p>
+                                        <ul class="unstyled">
+                                            <li class="yatWrap" ng-repeat="li in debugTcCookieList">{{li.k}}={{li.v}}</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <p><strong>Response:</strong></p>
+                                        <pre>{{debugTcResponse | parseJsonFilter}}</pre>
+                                    </div>
+                                </div>
+                                <br />
+                                <ul class="unstyled">
+                                    <li class="text-primary"><strong>获得参数：</strong></li>
+                                    <li class="text-success" ng-repeat="li in exampleWriteList">{{li}}</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="footer" ng-include="footer.html"></div>
+    </div>
+</div>
+
+<!-- Mainly scripts -->
+<script src="js/jquery-2.1.1.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/plugins/metisMenu/jquery.metisMenu.js"></script>
+<script src="js/plugins/slimscroll/jquery.slimscroll.min.js"></script>
+
+<!-- Custom and plugin javascript -->
+<script src="js/inspinia.js"></script>
+<script src="js/plugins/pace/pace.min.js"></script>
+
+<!-- Flot -->
+<script src="js/plugins/flot/jquery.flot.js"></script>
+<script src="js/plugins/flot/jquery.flot.tooltip.min.js"></script>
+<script src="js/plugins/flot/jquery.flot.resize.js"></script>
+
+<!-- ChartJS-->
+<script src="js/plugins/chartJs/Chart.min.js"></script>
+
+<!-- Peity -->
+<script src="js/plugins/peity/jquery.peity.min.js"></script>
+<!-- Peity demo -->
+<script src="js/demo/peity-demo.js"></script>
+<!-- ztree -->
+<script src="yat-js/jquery.ztree.all-3.5.min.js"></script>
+<!-- paginator -->
+<script src="yat-js/bootstrap-paginator.min.js"></script>
+<!-- Select2 -->
+<script src="js/plugins/select2/select2.full.min.js"></script>
+<!-- Date range picker -->
+<!-- Date range use moment.js same as full calendar plugin -->
+<script src="js/plugins/fullcalendar/moment.min.js"></script>
+<script src="js/plugins/daterangepicker/daterangepicker.js"></script>
+
+<!-- CodeMirror -->
+<script src="js/plugins/codemirror/codemirror.js"></script>
+<script src="yat-js/codemirror-mode-clike.js"></script>
+
+<script src="yat-js/ng-app.js"></script>
+<script src="yat-js/ng-ctrl-navbar.js"></script>
+<script src="yat-js/ng-ctrl-operation.js"></script>
+
+<div class="modal inmodal" id="spinnersModal" tabindex="-1" role="dialog"  aria-hidden="true" data-backdrop="static">
+    <div class="sk-spinner sk-spinner-chasing-dots col-lg-12" style="margin-left:50% ; margin-top:25% ; "><div class="sk-dot1"></div><div class="sk-dot2"></div></div>
+</div>
+
+</body>
+
+</html>

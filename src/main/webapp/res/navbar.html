@@ -1,0 +1,130 @@
+<nav class="navbar navbar-static-top" role="navigation">
+    <div class="navbar-header">
+        <button aria-controls="navbar" aria-expanded="false" data-target="#navbar" data-toggle="collapse" class="navbar-toggle collapsed" type="button">
+            <i class="fa fa-reorder"></i>
+        </button>
+        <a href="index.html" class="navbar-brand">YAT 自动化测试平台</a>
+    </div>
+    <div class="navbar-collapse collapse" id="navbar">
+        <ul class="nav navbar-nav">
+            <li ng-class="{'active':tabName=='Summary'}"><a aria-expanded="false" role="button" href="index.html"> 概览</a></li>
+            <!--<li ng-class="{'active':tabName=='TestPlan'}"><a aria-expanded="false" role="button" href="plan.html"> 测试计划</a></li>-->
+            <li ng-class="{'active':tabName=='TestCase'}"><a aria-expanded="false" role="button" href="case.html"> 测试用例</a></li>
+            <li class="dropdown" ng-class="{'active':tabName=='TestData'}">
+                <a aria-expanded="false" role="button" href="" class="dropdown-toggle" data-toggle="dropdown"> 数据维护 <span class="caret"></span></a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="parameter.html"> 参数化维护（全局变量）</a></li>
+                    <li><a href="db.html"> 数据库维护</a></li>
+                    <li><a href="operation.html"> 前后置操作维护</a></li>
+                    <li class="divider"></li>
+                    <li><a href="team.html"> 团队维护</a></li>
+                    <li><a href="project.html"> 项目维护</a></li>
+                    <li class="divider"></li>
+                    <li><a href="environment.html"> 测试环境维护</a></li>
+                    <li><a href="service.html"> 服务名维护</a></li>
+                </ul>
+            </li>
+            <!--<li ng-class="{'active':tabName=='TestEnv'}"><a aria-expanded="false" role="button" href="env.html"> 测试环境</a></li>-->
+            <li class="dropdown" ng-class="{'active':tabName=='TestReport'}">
+                <a aria-expanded="false" role="button" href="" class="dropdown-toggle" data-toggle="dropdown"> 结果报表 <span class="caret"></span></a>
+                <ul role="menu" class="dropdown-menu">
+                    <li><a href="report-list.html"> 运行结果列表</a></li>
+                    <!--
+                    <li><a href=""> 每月构建成功率</a></li>
+                    <li><a href=""> 用例统计</a></li>
+                    -->
+                </ul>
+            </li>
+        </ul>
+        <ul class="nav navbar-top-links navbar-right">
+            <li>
+                <a href="project.html"><i class="fa fa-paypal"></i> {{navProjectName}}</a>
+            </li>
+            <li>
+                <select class="form-control" ng-model="$parent.navEnvId" ng-options="ops.id as ops.name group by ops.projectName for ops in navEnvironmentList"
+                        ng-change="changeNavEnv()"></select>
+            </li>
+            <li ng-show="!isLogin">
+                <a href="" data-toggle="modal" data-target="#loginModal">
+                    <i class="fa fa-sign-in"></i> 登录
+                </a>
+            </li>
+            <li class="dropdown" ng-show="isLogin">
+                <a aria-expanded="false" role="button" href="" class="dropdown-toggle" data-toggle="dropdown"> {{loginUser.usernameCn}} <span class="caret"></span></a>
+                <ul role="menu" class="dropdown-menu">
+                    <!--<li><a href="profile.html" target="_blank">个人中心</a></li>-->
+                    <li><a href="" ng-click="startDailyCi()">触发每日CI</a></li>
+                    <li><a href="" data-toggle="modal" data-target="#feedbackModal">意见反馈</a></li>
+                    <li><a aria-expanded="false" role="button" href="http://192.168.102.152:8090/pages/viewpage.action?pageId=7110658" target="_blank"> 帮助文档</a></li>
+                    <li class="divider"></li>
+                    <li><a href="" ng-click="logout()"><i class="fa fa-sign-out"></i> 退出</a></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="modal inmodal fade" id="loginModal" tabindex="-2" role="dialog"  aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">YAT</h4>
+                <small class="font-bold">Yoho Automated Testing Platform<br>有货自动化测试平台</small>
+            </div>
+            <div class="modal-body">
+                <form class="m-t" role="form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Username" required="" ng-model="$parent.loginUsername">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" class="form-control" placeholder="Password" required="" ng-model="$parent.loginPassword">
+                    </div>
+                    <div class="form-group" ng-show="login_info">
+                        <p class="text-danger" >{{login_info}}</p>
+                    </div>
+                    <button type="submit" class="btn btn-primary block full-width m-b" ng-click="login()">登录</button>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <p>使用YOHO统一域账号登录</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="feedbackModal" tabindex="-2" role="dialog"  aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">意见反馈</h4>
+                <small class="font-bold">欢迎提出您在使用过程中遇到的问题或宝贵建议（500字以内），感谢您对YAT的支持。</small>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                <form class="m-t" role="form">
+                    <div class="form-group">
+                        <div class="col-lg-12 m-b" style="padding-left: 0px;">
+                            <label class="checkbox-inline"><input type="radio" value="1" name="optionsRadios" ng-click="$parent.feedbackType=1"> 提个需求 </label>
+                            <label class="checkbox-inline"><input type="radio" value="2" name="optionsRadios" ng-click="$parent.feedbackType=2"> 提个BUG </label>
+                            <label class="checkbox-inline"><input type="radio" value="3" name="optionsRadios" ng-click="$parent.feedbackType=3"> 提个建议 </label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <div class="col-lg-12 m-t" style="padding-left: 0px;">
+                            <textarea class="form-control" rows="15" ng-model="$parent.feedbackData"></textarea>
+                        </div>
+                    </div>
+                </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <strong class="text-danger pull-left">{{errorInfo}}</strong>
+                <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" ng-click="doFeedback()">提交反馈</button>
+            </div>
+        </div>
+    </div>
+</div>
