@@ -1245,7 +1245,6 @@ public class TestcaseService {
     public void testRunHttp(JSONObject res,String userId,String isPost,String envId,String url,String parameters,String preOpsIds,String ueHeaderList,
                             String ueCookieList,String ueGetHttpResList,String ds,String dsIdx) throws Exception{
         int envIdInt = Integer.parseInt(envId);
-        Environment environment = es.getById(envIdInt);
         boolean isPostBool = Boolean.parseBoolean(isPost);
         Testcase oTestcase = new Testcase();
         oTestcase.setTestEnvId(envIdInt);
@@ -1273,9 +1272,9 @@ public class TestcaseService {
         // run case
         RunHttpResultEntity oRunHttpResultEntity = runCase(oTestcase,null,globalParamMap,dsParamMap,null);
         JSONObject o = (JSONObject)JSONObject.toJSON(oRunHttpResultEntity);
-        o.put("fullUrl",environment.getHostUrl() + url);
+        o.put("fullUrl",oRunHttpResultEntity.getUrl());
         o.put("fullMethod",isPostBool?"POST":"GET");
-        o.put("fullPostData",parameters);
+        o.put("fullPostData",oRunHttpResultEntity.getParameters());
         res.put("success",true);
         res.put("data",o);
     }
@@ -1538,6 +1537,8 @@ public class TestcaseService {
             LogUtil.addLog(uuid,"获取header","完成,headers: "+s+headerS,"black","","");
 
             LogUtil.addLog(uuid,"发送HTTP请求",postStr+" | "+url+" | "+parameters,"black","","");
+            httpResult.setUrl(url);
+            httpResult.setParameters(parameters);
             if(testcase.getIsPost()){
                 httpResult = HttpUtil.doPost(url,parameters,inputCookies,inputHeaders,socketTimeout,connectTimeout);
             }else {
