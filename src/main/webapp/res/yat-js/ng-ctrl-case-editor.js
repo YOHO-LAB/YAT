@@ -74,7 +74,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         });
     }
     $scope.getOps = function () {
-        var search = {'s_ops_id':'','s_ops_name':$scope.trimVar($scope.s_ops_name),'s_ops_note':$scope.trimVar($scope.s_ops_note)};
+        var search = {'s_ops_id':'','s_ops_name':$scope.trimVar($scope.s_ops_name),'s_ops_note':$scope.trimVar($scope.s_ops_note),'envId':$scope.global.envId};
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/data',
             {'method':'getOps','search':JSON.stringify(search) , 'page':$scope.page,'count':20}
