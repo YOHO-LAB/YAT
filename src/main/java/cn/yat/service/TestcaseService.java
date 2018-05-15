@@ -1450,7 +1450,7 @@ public class TestcaseService {
             Map<String,String> reqParams = Maps.newHashMap();
             if(testcase.getIsPost()){
                 reqParams = pu.getReqParams(parameters);
-                parameters = pu.clientSecret(uuid,projectId,reqParams);
+                parameters = pu.clientSecret(uuid,projectId,reqParams,true);
             }else{
                 int idx = url.indexOf("?");
                 if(idx > 0){
@@ -1458,7 +1458,7 @@ public class TestcaseService {
                     String url_param = url.substring(idx+1).trim();
                     if(!url_param.equals("")){
                         reqParams = pu.getReqParams(url_param);
-                        url_param = pu.clientSecret(uuid,projectId,reqParams);
+                        url_param = pu.clientSecret(uuid,projectId,reqParams,false);
                     }
                     url = url_pre + url_param;
                 }
