@@ -387,14 +387,20 @@ public class ParameterService {
             String dbName = db.getDbName();
             String userName = db.getUserName();
             String password = db.getPassWord();
-            return JdbcUtil.query(ip,port,dbName,userName,password,sql,column,getValType);
+            String res = JdbcUtil.query(ip,port,dbName,userName,password,sql,column,getValType);
+            oParameter.setParamType(1);
+            oParameter.setKvVal(res);
+            return res;
         }
         if(oParameter.getParamType() == 3){//TC
             int tcId = oParameter.getTcId();
             String tcHeader = oParameter.getTcHeader();
             String tcCookie = oParameter.getTcCookie();
             String tcJsonPath = oParameter.getTcJsonPath();
-            return exeParamTc(oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
+            String res = exeParamTc(oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
+            oParameter.setParamType(1);
+            oParameter.setKvVal(res);
+            return res;
         }
         throw new Exception("参数类型["+oParameter.getParamType()+"]不存在！");
     }
@@ -406,12 +412,12 @@ public class ParameterService {
             String val = dsParamMap.get(paramName);
             if(val.contains("${")){
                 val = pu.replaceParam(uuid,val,globalParamMap,dsParamMap,localParamMap);
+                dsParamMap.put(paramName,val);
             }
             return val;
         }
         if(globalParamMap.containsKey(paramName)){
             String res = getValOfGlobalParam(globalParamMap.get(paramName));
-            localParamMap.put(paramName,res);
             return res;
         }
         throw new Exception("参数 "+paramName+" ,取值失败！");
