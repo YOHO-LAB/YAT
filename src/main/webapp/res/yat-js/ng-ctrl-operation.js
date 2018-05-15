@@ -338,6 +338,9 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
                     $scope.exampleWriteList = data.data;
                     $scope.showTcDiv = true;
                 }
+                if(data.type == 'java'){
+                    $scope.logList.push(data.data);
+                }
             }else{
                 alert("[Error]:"+data.data);
             }
