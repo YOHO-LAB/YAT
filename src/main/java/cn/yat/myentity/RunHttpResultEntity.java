@@ -6,6 +6,8 @@ import org.apache.http.cookie.Cookie;
 import java.util.List;
 
 public class RunHttpResultEntity {
+    String url;
+    String parameters;
     long responseTime;
     String response;
     int code;
@@ -113,5 +115,21 @@ public class RunHttpResultEntity {
 
     public void setHeadersRequest(Header[] headersRequest) {
         this.headersRequest = headersRequest;
+    }
+    
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public String getParameters() {
+        return parameters;
+    }
+
+    public void setParameters(String parameters) {
+        this.parameters = parameters;
     }
 }
