@@ -71,7 +71,7 @@ public class ParamUtil {
         return reqParams;
     }
 
-    public String clientSecret(String uuid,int projectId,Map<String,String> reqParams) throws Exception{
+    public String clientSecret(String uuid,int projectId,Map<String,String> reqParams,boolean isPost) throws Exception{
         String clientSecret = ClientSecretUtil.getClientSecret(projectId,reqParams);
         reqParams.put("client_secret",clientSecret);
         List<String> array = new LinkedList<>();
@@ -79,6 +79,11 @@ public class ParamUtil {
             String v = reqParams.get(k);
             if(projectId == ClientSecretUtil.MARS_PROJECT_ID){
                 v = URLEncoder.encode(v,"UTF-8");
+            }
+            if(!isPost){
+                if(v.startsWith("[") && v.endsWith("]")){
+                    v = URLEncoder.encode(v,"UTF-8");
+                }
             }
             array.add(k+"="+v);
         }
