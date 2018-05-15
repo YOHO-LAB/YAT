@@ -470,6 +470,7 @@ public class OperationService{
             LogUtil.addLog(uuid,title,"执行JAVA代码：完成。返回结果："+ret,"blue","","");
             res.put("success", true);
             res.put("data", "执行JAVA代码：完成。返回结果："+ret);
+            res.put("type", "java");
         }
         if(opsType == 5){
             int waitTime = operation.getWaitTime();
