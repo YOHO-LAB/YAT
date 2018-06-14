@@ -6,6 +6,7 @@ import cn.yat.myentity.LogDataSourceEntity;
 import cn.yat.myentity.LogEntity;
 import cn.yat.myentity.RunHttpResultEntity;
 import cn.yat.util.*;
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -20,10 +21,16 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.*;
 
 /**
  * Created by rong.gao on 2018/3/6.
@@ -39,6 +46,8 @@ public class TestcaseService {
     private TeamService ts;
     @Autowired
     private ServiceService ss;
+    @Autowired
+    private DbService ds;
     @Autowired
     private EnvironmentService es;
     @Autowired
@@ -65,6 +74,8 @@ public class TestcaseService {
     private String debugCaseLogDir;
     @Value("${runCaseLogDir}")
     private String runCaseLogDir;
+    @Value("${reportLogDir}")
+    private String reportLogDir;
     @Value("${domain}")
     private String domain;
     @Value("${port}")
@@ -75,9 +86,44 @@ public class TestcaseService {
     private int connectTimeout;
     @Value("${reRunCount}")
     private int reRunCaseCount;
+    @Value("${testcase.timeout}")
+    private int testcaseTimeout;
 
     private SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
 
+    public JSONObject get(HttpServletRequest request){
+        JSONObject res = new JSONObject();
+        res.put("success", false);
+        res.put("data", "N/A");
+        String method = request.getParameter("method");
+        // http://192.168.104.43:28080/yat/api/tc?method=runDailyCi
+        if(method.equals("runDailyCi")){
+            aeu.doExecute(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        runDailyCi("每日CI-接口触发",null,null,0,500);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+            res.put("success", true);
+            res.put("data", "已出发 每日CI");
+        }
+        try{
+            if(method.equals("copyByEnvId")){
+                String fromEnvId = request.getParameter("fromEnvId");
+                String toEnvId = request.getParameter("toEnvId");
+                copyByEnvId(res,fromEnvId,toEnvId);
+            }
+        }catch(Exception e){
+            e.printStackTrace();
+            res.put("success", false);
+            res.put("data", e.getMessage());
+        }
+        return res;
+    }
     public JSONObject post(HttpServletRequest request) {
         JSONObject res = new JSONObject();
         res.put("success", false);
@@ -122,6 +168,7 @@ public class TestcaseService {
                 String userId = request.getParameter("userId");
                 String isPost = request.getParameter("isPost");
                 String envId = request.getParameter("envId");
+                String hostParam = request.getParameter("hostParam");
                 String url = request.getParameter("url");
                 String parameters = request.getParameter("parameters");
                 String preOpsIds = request.getParameter("preOpsIds");
@@ -130,7 +177,10 @@ public class TestcaseService {
                 String ueGetHttpResList = request.getParameter("ueGetHttpResList");
                 String ds = request.getParameter("ds");
                 String dsIdx = request.getParameter("dsIdx");
-                testRunHttp(res,userId,isPost,envId,url,parameters,preOpsIds,ueHeaderList,ueCookieList,ueGetHttpResList,ds,dsIdx);
+                testRunHttp(res,userId,isPost,envId,hostParam,url,parameters,preOpsIds,ueHeaderList,ueCookieList,ueGetHttpResList,ds,dsIdx);
+            }
+            if(method.equals("runDailyCi")){
+                runDailyCi("每日CI-接口触发",null,null,0,500);
             }
             if(method.equals("runDailyCiManually")){
                 String userId = request.getParameter("userId");
@@ -158,6 +208,10 @@ public class TestcaseService {
                 String count = request.getParameter("count");
                 getCiReport(res,timeRange,  page ,  count);
             }
+            if(method.equals("delDebugLog")){
+                String userId = request.getParameter("userId");
+                delDebugLog(res,userId);
+            }
             if(method.equals("getDebugReport")){
                 String timeRange = request.getParameter("timeRange");
                 String page = request.getParameter("page");
@@ -169,19 +223,15 @@ public class TestcaseService {
                 String isCi = request.getParameter("isCi");
                 getDetailReportLog(res,uuid,isCi);
             }
+            if(method.equals("getSummaryOfCaseNum")){
+                getSummaryOfCaseNum(res);
+            }
+            if(method.equals("getSummaryOfCiPassRate")){
+                getSummaryOfCiPassRate(res);
+            }
             if(method.equals("getSummaryOfCase")){
                 getSummaryOfCase(res);
             }
-            if(method.equals("getSummaryOfCi")){
-                getSummaryOfCi(res);
-            }
-            if(method.equals("getSummaryOfLastFiveCi")){
-                getSummaryOfLastFiveCi(res);
-            }
-            if(method.equals("getSummaryOfTeamCase")){
-                getSummaryOfTeamCase(res);
-            }
-
         }catch(Exception e){
             e.printStackTrace();
             res.put("success", false);
@@ -197,6 +247,7 @@ public class TestcaseService {
         int status = oTestcaseJson.getIntValue("status");
         int serviceId = oTestcaseJson.getIntValue("serviceId");
         int testEnvId = oTestcaseJson.getIntValue("testEnvId");
+        String hostParam = oTestcaseJson.getString("hostParam");
         String method = oTestcaseJson.getString("method");
         boolean isPost = oTestcaseJson.getBooleanValue("isPost");
         String url = oTestcaseJson.getString("url");
@@ -218,6 +269,7 @@ public class TestcaseService {
         oTestcase.setStatus(status);
         oTestcase.setServiceId(serviceId);
         oTestcase.setTestEnvId(testEnvId);
+        oTestcase.setHostParam(hostParam);
         oTestcase.setMethod(method);
         oTestcase.setIsPost(isPost);
         oTestcase.setUrl(url);
@@ -281,6 +333,7 @@ public class TestcaseService {
         int status = oTestcaseJson.getIntValue("status");
         int serviceId = oTestcaseJson.getIntValue("serviceId");
         int testEnvId = oTestcaseJson.getIntValue("testEnvId");
+        String hostParam = oTestcaseJson.getString("hostParam");
         String method = oTestcaseJson.getString("method");
         boolean isPost = oTestcaseJson.getBooleanValue("isPost");
         String url = oTestcaseJson.getString("url");
@@ -301,6 +354,7 @@ public class TestcaseService {
         oTestcase.setStatus(status);
         oTestcase.setServiceId(serviceId);
         oTestcase.setTestEnvId(testEnvId);
+        oTestcase.setHostParam(hostParam);
         oTestcase.setMethod(method);
         oTestcase.setIsPost(isPost);
         oTestcase.setUrl(url);
@@ -548,6 +602,122 @@ public class TestcaseService {
         res.put("success", true);
         res.put("data", list);
     }
+    public void copyByEnvId(JSONObject res,String fromEnvId,String toEnvId) throws Exception{
+        int fromEnvIdInt = Integer.parseInt(fromEnvId);
+        int toEnvIdInt = Integer.parseInt(toEnvId);
+        Date now = new Date();
+        Map<Integer,Integer> parameterMap = Maps.newHashMap();
+        Map<Integer,Integer> dbMap = Maps.newHashMap();
+        Map<Integer,Integer> operationMap = Maps.newHashMap();
+        Map<Integer,Integer> testcaseMap = Maps.newHashMap();
+        // copy Param
+        List<Parameter> paramList = ps.getParamByEnvId(fromEnvIdInt);
+        for(Parameter parameter : paramList){
+            int oldId = parameter.getId();
+            parameter.setId(0);
+            parameter.setEnvId(toEnvIdInt);
+            parameter.setAddTime(now);
+            parameter.setUpdateTime(now);
+            int paramId = ps.addParameter(parameter);
+            parameterMap.put(oldId,paramId);
+        }
+        // copy db
+        List<Db> dbList = ds.getDbByEnvId(fromEnvIdInt);
+        for(Db db : dbList){
+            int oldId = db.getId();
+            db.setId(0);
+            db.setEnvId(toEnvIdInt);
+            db.setAddTime(now);
+            db.setUpdateTime(now);
+            int dbId = ds.addDb(db);
+            dbMap.put(oldId,dbId);
+        }
+        // copy operation
+        List<Operation> opsList = os.getOpsByEnvId(fromEnvIdInt);
+        for(Operation operation : opsList){
+            int oldId = operation.getId();
+            operation.setId(0);
+            operation.setEnvId(toEnvIdInt);
+            operation.setAddTime(now);
+            operation.setUpdateTime(now);
+            int opsId = os.addOperation(operation);
+            operationMap.put(oldId,opsId);
+        }
+
+        // copy case
+        TestcaseExample example = new TestcaseExample();
+        TestcaseExample.Criteria criteria = example.createCriteria();
+        criteria.andTestEnvIdEqualTo(fromEnvIdInt);
+        criteria.andStatusGreaterThan(0);
+        List<Testcase> list = testcaseMapper.selectByExample(example);
+        for(Testcase testcase : list){
+            int oldId = testcase.getId();
+            testcase.setId(0);
+            testcase.setStatus(1);
+            testcase.setTestEnvId(toEnvIdInt);
+            testcase.setAddTime(now);
+            testcase.setUpdateTime(now);
+            testcase.setPreOpsIds(getNewIds(operationMap,testcase.getPreOpsIds()));
+            testcase.setAfterTestOpsIds(getNewIds(operationMap,testcase.getAfterTestOpsIds()));
+            testcase.setPostOpsIds(getNewIds(operationMap,testcase.getPostOpsIds()));
+            int caseId = addTestcase(testcase);
+            testcaseMap.put(oldId,caseId);
+            DataSourceLoop dataSourceLoop = dataSourceLoopMapper.selectByPrimaryKey(oldId);
+            if(dataSourceLoop != null){
+                dataSourceLoop.setCaseId(caseId);
+                dataSourceLoopMapper.insert(dataSourceLoop);
+            }
+        }
+
+        // modify param
+        for(int oldId : parameterMap.keySet()){
+            int newId = parameterMap.get(oldId);
+            Parameter parameter = ps.getById(newId);
+            parameter.setDbId(dbMap.get(parameter.getDbId()));
+            parameter.setTcId(testcaseMap.get(parameter.getTcId()));
+            ps.updateParameter(parameter);
+        }
+        // modify operation
+        for(int oldId : operationMap.keySet()){
+            int newId = operationMap.get(oldId);
+            Operation operation = os.getById(newId);
+            operation.setDbId(dbMap.get(operation.getDbId()));
+            operation.setTcId(testcaseMap.get(operation.getTcId()));
+            os.updateOperation(operation);
+            os.addBshJavaCode(oldId,newId);
+        }
+
+        res.put("success", true);
+        res.put("data", list);
+    }
+    private String getNewIds(Map<Integer,Integer> map,String ids) throws Exception{
+        String res = "";
+        for(String s : ids.split(",")){
+            s = s.trim();
+            if(!s.equals("")){
+                int sInt = Integer.parseInt(s);
+                if(map.containsKey(sInt)){
+                    int newId = map.get(sInt);
+                    res += newId + ",";
+                }
+            }
+        }
+        return res;
+    }
+    public int addTestcase(Testcase testcase) throws Exception{
+        int ist = testcaseMapper.insert(testcase);
+        if(ist > 0){
+            TestcaseExample example = new TestcaseExample();
+            TestcaseExample.Criteria criteria = example.createCriteria();
+            criteria.andTestEnvIdEqualTo(testcase.getTestEnvId());
+            criteria.andNoteEqualTo(testcase.getNote());
+            List<Testcase> l = testcaseMapper.selectByExample(example);
+            if(l.size() > 0){
+                return l.get(0).getId();
+            }
+        }
+        return 0;
+    }
     public void getDebugLog(JSONObject res,String runId) throws Exception{
         int runIdInt = Integer.parseInt(runId);
         JSONArray arr = getLogByRunId(runIdInt);
@@ -594,12 +764,22 @@ public class TestcaseService {
         if(le == null){
             RunSummary oRunSummary = runSummaryMapper.selectByPrimaryKey(runId);
             String log = oRunSummary.getLog();
+            log = getLogEntityStrByLog(log);
             JSONObject leObj = JSONObject.parseObject(log);
             le = JSONObject.toJavaObject(leObj,LogEntity.class);
         }
         return le;
     }
-    public void getSummaryOfCase(JSONObject res) throws Exception{
+    private String getLogEntityStrByLog(String uuid) throws Exception{
+        FileReader fr = new FileReader(reportLogDir+uuid);
+        int ch;
+        StringBuffer sb = new StringBuffer();
+        while((ch = fr.read())!=-1 ){
+            sb.append((char)ch);
+        }
+        return sb.toString();
+    }
+    public void getSummaryOfCaseNum(JSONObject res) throws Exception{
         int[] list = new int[30];
         Date[] dateList = new Date[30];
         Date now = new Date();
@@ -647,7 +827,7 @@ public class TestcaseService {
         res.put("ciPercent", ciPercent);
         res.put("ci", ci);
     }
-    public void getSummaryOfCi(JSONObject res) throws Exception{
+    public void getSummaryOfCiPassRate(JSONObject res) throws Exception{
         RunSummaryExample example = new RunSummaryExample();
         RunSummaryExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(0);
@@ -689,9 +869,7 @@ public class TestcaseService {
     }
     private JSONObject getPassRateBySummaryLog(RunSummary oRunSummary) throws Exception{
         JSONObject obj = new JSONObject();
-        String log = oRunSummary.getLog();
-        JSONObject logObj = JSONObject.parseObject(log);
-        LogEntity le = JSONObject.toJavaObject(logObj,LogEntity.class);
+        LogEntity le = getLogEntity(oRunSummary.getId());;
         Map<Integer , List<LogDataSourceEntity>> me = le.getMap();
         int pass=0,fail=0,skip=0,total=0;
         double passRate = 0.00;
@@ -722,16 +900,6 @@ public class TestcaseService {
         obj.put("passRate",passRate);
         return obj;
     }
-    public void getSummaryOfLastFiveCi(JSONObject res) throws Exception{
-        RunSummaryExample example = new RunSummaryExample();
-        RunSummaryExample.Criteria criteria = example.createCriteria();
-        criteria.andUserIdEqualTo(0);
-        example.setOrderByClause("start_time desc limit 5");
-        List<RunSummary> list = runSummaryMapper.selectByExample(example);
-        res.put("success", true);
-        res.put("data", list);
-    }
-
     private String getOperationDuration(Date date , Date now) throws Exception{
         long s = now.getTime() - date.getTime();
         if(s<1000){
@@ -760,94 +928,43 @@ public class TestcaseService {
             }
         }
     }
-    public void getSummaryOfTeamCase(JSONObject res) throws Exception{
-        List<Team> teamList = ts.getAllTeam();
-        List<Environment> envList = es.getAllEnvironment();
-        List<String> thList = Lists.newArrayList();
-        for(Environment oEnvironment : envList){
-            thList.add(oEnvironment.getName());
-        }
-        Calendar ca = Calendar.getInstance();
-        ca.setTime(new Date());
-        ca.set(Calendar.DATE, 1);
-        ca.set(Calendar.HOUR_OF_DAY, 0);
-        ca.set(Calendar.MINUTE, 0);
-        ca.set(Calendar.SECOND, 0);
-        Date thisMonth = ca.getTime();
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");
-        JSONArray trList = new JSONArray();
-        for(Team oTeam : teamList){
-            JSONObject obj = (JSONObject) JSONObject.toJSON(oTeam);
-            List<Integer> list = Lists.newArrayList();
-            int total = 0;
-            for(Environment oEnvironment : envList){
-                TestcaseExample example = new TestcaseExample();
-                TestcaseExample.Criteria criteria = example.createCriteria();
-                criteria.andTeamIdEqualTo(oTeam.getId());
-                criteria.andTestEnvIdEqualTo(oEnvironment.getId());
-                criteria.andStatusGreaterThan(0);
-                int count = testcaseMapper.countByExample(example);
-                list.add(count);
-                total += count;
+    public void getSummaryOfCase(JSONObject res) throws Exception{
+        List<Project> projectList = prjs.getAllProject();
+        JSONArray arr = new JSONArray();
+        for(Project project : projectList){
+            JSONObject object = new JSONObject();
+            object.put("name",project.getName());
+            List<Environment> envList = es.getAllEnvironmentByPrjId(project.getId());
+            List<cn.yoho.yat.entity.Service> srvList = ss.getAllServiceByPrjId(project.getId());
+            int thSize = envList.size();
+            List<String> thList = Lists.newArrayList();
+            for(int i=0;i<thSize;i++){
+                thList.add(envList.get(i).getName());
             }
-            TestcaseExample example2 = new TestcaseExample();
-            TestcaseExample.Criteria criteria2 = example2.createCriteria();
-            criteria2.andStatusEqualTo(2);
-            criteria2.andTeamIdEqualTo(oTeam.getId());
-            List<Testcase> testcaseList = testcaseMapper.selectByExample(example2);
-            List<Integer> caseIdList = Lists.newArrayList();
-            for(Testcase o : testcaseList){
-                caseIdList.add(o.getId());
-            }
-            RunSummaryExample example3 = new RunSummaryExample();
-            RunSummaryExample.Criteria criteria3 = example3.createCriteria();
-            criteria3.andStartTimeGreaterThanOrEqualTo(thisMonth);
-            List<RunSummary> rsList = runSummaryMapper.selectByExample(example3);
-            List<Integer> caseIdList2 = Lists.newArrayList();
-            String caseIdsStr = "";
-            int failNum = 0;
-            int passNum = 0;
-            int totalNum = 0;
-            String passRateNum = "0.00";
-            for(RunSummary o : rsList){
-                String log = o.getLog();
-                if(log !=null){
-                    JSONObject logObj = JSONObject.parseObject(log);
-                    LogEntity le = JSONObject.toJavaObject(logObj,LogEntity.class);
-                    Map<Integer , List<LogDataSourceEntity>> me = le.getMap();
-                    for(int cId : me.keySet()){
-                        if(caseIdList.contains(cId)){
-                            List<LogDataSourceEntity> dseList = me.get(cId);
-                            for(LogDataSourceEntity dse : dseList){
-                                if(dse.getF()==1){
-                                    failNum ++;
-                                }
-                                if(dse.getP()==1){
-                                    passNum ++;
-                                }
-                                totalNum ++;
-                            }
-                        }
-                    }
+            object.put("thList",thList);
+            JSONArray trList = new JSONArray();
+            for(cn.yoho.yat.entity.Service s : srvList){
+                JSONArray tdArr = new JSONArray();
+                tdArr.add(s.getName());
+                for(int i=0;i<thSize;i++){
+                    int num = getCaseNumBySrvIdAndEnvId(s.getId(),envList.get(i).getId());
+                    tdArr.add(num);
                 }
+                trList.add(tdArr);
             }
-            if(totalNum > 0){
-                BigDecimal bd = new BigDecimal(passNum*100.0/totalNum);
-                bd = bd.setScale(2, RoundingMode.HALF_UP);
-                passRateNum = bd.toString();
-            }
-            obj.put("tdList",list);
-            obj.put("total",total);
-            obj.put("nowMonth",sdf.format(thisMonth));
-            obj.put("failNum",failNum);
-            obj.put("totalNum",totalNum);
-            obj.put("passRateNum",passRateNum);
-            trList.add(obj);
+            object.put("trList",trList);
+            arr.add(object);
         }
         res.put("success", true);
-        res.put("data", "");
-        res.put("thList", thList);
-        res.put("trList", trList);
+        res.put("data", arr);
+    }
+    private int getCaseNumBySrvIdAndEnvId(int srvId,int envId) throws Exception{
+        TestcaseExample example = new TestcaseExample();
+        TestcaseExample.Criteria criteria = example.createCriteria();
+        criteria.andStatusNotEqualTo(0);
+        criteria.andServiceIdEqualTo(srvId);
+        criteria.andTestEnvIdEqualTo(envId);
+        return testcaseMapper.countByExample(example);
     }
     public void getCiReport(JSONObject res , String timeRange , String page , String count) throws Exception{
         JSONObject object = getReportList("ci",timeRange,page,count);
@@ -855,6 +972,14 @@ public class TestcaseService {
         res.put("data", object.getJSONArray("data"));
         res.put("totalCount", object.getIntValue("totalCount"));
         res.put("totalPage", object.getIntValue("totalPage"));
+    }
+    public void delDebugLog(JSONObject res , String userId) throws Exception{
+        RunSummaryExample example = new RunSummaryExample();
+        RunSummaryExample.Criteria criteria = example.createCriteria();
+        criteria.andIsCiEqualTo(false);
+        int upd = runSummaryMapper.deleteByExample(example);
+        res.put("success", true);
+        res.put("data", upd);
     }
     public void getDebugReport(JSONObject res , String timeRange , String page , String count) throws Exception{
         JSONObject object = getReportList("debug",timeRange,page,count);
@@ -869,6 +994,9 @@ public class TestcaseService {
         Date[] date = getDateByTimeRange(timeRange);
         RunSummaryExample example = new RunSummaryExample();
         RunSummaryExample.Criteria criteria = example.createCriteria();
+        if(reportType.equals("debug")){
+            criteria.andUserIdGreaterThan(0);
+        }
         if(reportType.equals("ci")){
             criteria.andUserIdEqualTo(0);
             criteria.andIsCiEqualTo(true);
@@ -918,15 +1046,12 @@ public class TestcaseService {
         RunSummary oRunSummary = runSummaryMapper.selectByPrimaryKey(idInt);
         if(oRunSummary!=null){
             String userName = us.getUserNameCnById(oRunSummary.getUserId());
-            String log = oRunSummary.getLog();
-            JSONObject logObj = JSONObject.parseObject(log);
-            LogEntity le = JSONObject.toJavaObject(logObj,LogEntity.class);
+            LogEntity le = getLogEntity(oRunSummary.getId());
             Map<Integer , List<LogDataSourceEntity>> me = le.getMap();
             int total = 0;
             int pass = 0;
             int skip = 0;
             int fail = 0;
-//            JSONArray arr = new JSONArray();
             List<JSONObject> failList = Lists.newArrayList();
             List<JSONObject> passList = Lists.newArrayList();
             for(int cId : me.keySet()){
@@ -947,7 +1072,6 @@ public class TestcaseService {
                         fail ++;
                     }
                     total ++;
-//                    arr.add(obj);
                     if(dse.getP()==1){
                         passList.add(obj);
                     }else{
@@ -976,24 +1100,6 @@ public class TestcaseService {
             List<JSONObject> sortList = Lists.newArrayList();
             sortList.addAll(failList);
             sortList.addAll(passList);
-//            for(int i=0;i<arr.size();i++){
-//                sortList.add(arr.getJSONObject(i));
-//            }
-//            Collections.sort(sortList, new Comparator<JSONObject>() {
-//                @Override
-//                public int compare(JSONObject o1, JSONObject o2) {
-//                    if(o1.getIntValue("f") == 1){
-//                        return -1;
-//                    }
-//                    if(o2.getIntValue("f") == 1){
-//                        return 1;
-//                    }
-//                    if(o1.getLongValue("h") > o2.getLongValue("h")) return -1;
-//                    if(o1.getLongValue("h") == o2.getLongValue("h")) return 0;
-//                    if(o1.getLongValue("h") < o2.getLongValue("h")) return 1;
-//                    return 0;
-//                }
-//            });
 
             res.put("data", oRunSummary);
             res.put("log", sortList);
@@ -1127,9 +1233,9 @@ public class TestcaseService {
         List<Project> projectList = prjs.getAllProject();
         Map<String ,Map<String,int[]>> map = Maps.newHashMap();
         for(Project p : projectList){
-            List<cn.yat.entity.Service> serviceList = ss.getAllServiceByPrjId(p.getId());
+            List<cn.yoho.yat.entity.Service> serviceList = ss.getAllServiceByPrjId(p.getId());
             List<Environment> envList = es.getAllEnvironmentByPrjId(p.getId());
-            for(cn.yat.entity.Service s : serviceList){
+            for(cn.yoho.yat.entity.Service s : serviceList){
                 map.put(p.getName()+"-"+s.getName(),Maps.newHashMap());
                 for(Environment e : envList){
                     map.get(p.getName()+"-"+s.getName()).put(p.getName()+"-"+e.getName(),new int[4]);
@@ -1192,7 +1298,7 @@ public class TestcaseService {
                 "</table>\n" +
                 "<br>\n";
         for(Project p : projectList){
-            List<cn.yat.entity.Service> serviceList2 = ss.getAllServiceByPrjId(p.getId());
+            List<cn.yoho.yat.entity.Service> serviceList2 = ss.getAllServiceByPrjId(p.getId());
             List<Environment> envList2 = es.getAllEnvironmentByPrjId(p.getId());
             msg +=  "<table border=\"2\" cellspacing=\"0\" style=\"border:1px solid #e7e7e7\">\n" +
                     "<tr style=\"background-color:#F5F5F6;border:1px solid #e7e7e7\" align=\"center\">\n" +
@@ -1210,7 +1316,7 @@ public class TestcaseService {
                         "<th style=\"border:1px solid #e7e7e7\">用例总数</th>\n";
             }
             msg +=  "</tr>\n";
-            for(cn.yat.entity.Service s : serviceList2){
+            for(cn.yoho.yat.entity.Service s : serviceList2){
                 msg += "<tr align=\"center\">\n" +
                         "<td style=\"background-color:lightcyan;border:1px solid #e7e7e7\">"+s.getName()+"</td>\n";
                 for(Environment e : envList2){
@@ -1242,7 +1348,7 @@ public class TestcaseService {
         }
         return passRate;
     }
-    public void testRunHttp(JSONObject res,String userId,String isPost,String envId,String url,String parameters,String preOpsIds,String ueHeaderList,
+    public void testRunHttp(JSONObject res,String userId,String isPost,String envId,String hostParam,String url,String parameters,String preOpsIds,String ueHeaderList,
                             String ueCookieList,String ueGetHttpResList,String ds,String dsIdx) throws Exception{
         int envIdInt = Integer.parseInt(envId);
         boolean isPostBool = Boolean.parseBoolean(isPost);
@@ -1250,6 +1356,7 @@ public class TestcaseService {
         oTestcase.setTestEnvId(envIdInt);
         oTestcase.setPreOpsIds(preOpsIds);
         oTestcase.setIsPost(isPostBool);
+        oTestcase.setHostParam(hostParam);
         oTestcase.setUrl(url);
         oTestcase.setParameters(parameters);
         oTestcase.setCookieList(ueCookieList);
@@ -1270,7 +1377,7 @@ public class TestcaseService {
             }
         }
         // run case
-        RunHttpResultEntity oRunHttpResultEntity = runCase(oTestcase,null,globalParamMap,dsParamMap,null);
+        RunHttpResultEntity oRunHttpResultEntity = runCase(oTestcase,null,globalParamMap,dsParamMap,Maps.newHashMap());
         JSONObject o = (JSONObject)JSONObject.toJSON(oRunHttpResultEntity);
         o.put("fullUrl",oRunHttpResultEntity.getUrl());
         o.put("fullMethod",isPostBool?"POST":"GET");
@@ -1350,7 +1457,20 @@ public class TestcaseService {
         if(subject != null){
             oRunSummary.setName(subject);
         }
-        oRunSummary.setLog(JSONObject.toJSONString(logEntity));
+        String uuid = UUID.randomUUID().toString();
+        FileWriter fw ;
+        try {
+            File f = new File(reportLogDir);
+            if(!f.exists()){
+                f.mkdirs();
+            }
+            fw = new FileWriter(reportLogDir+uuid);
+            fw.write(JSONObject.toJSONString(logEntity));
+            fw.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        oRunSummary.setLog(uuid);
         oRunSummary.setEndTime(new Date());
         runSummaryMapper.updateByPrimaryKeySelective(oRunSummary);
         LogUtil.removeLogEntity(runId);
@@ -1372,12 +1492,12 @@ public class TestcaseService {
         }
         ldsList.add(oLogDataSourceEntity);
 
-        RunHttpResultEntity runRes = runCase(oTestcase,uuid,globalParamMap,dsMap,null);
+        RunHttpResultEntity runRes = runCase(oTestcase,uuid,globalParamMap,dsMap,Maps.newHashMap());
         //失败重试
         if(!isDebug && !runRes.isPass()){
             for(int i=0;i<reRunCaseCount;i++){
                 LogUtil.addLog(uuid,"异常重跑，第"+(i+1)+"次","异常原因："+runRes.getException(),"","lightpink","");
-                runRes = runCase(oTestcase,uuid,globalParamMap,dsMap,null);
+                runRes = runCase(oTestcase,uuid,globalParamMap,dsMap,Maps.newHashMap());
                 if(runRes.isPass()){
                     LogUtil.addLog(uuid,"异常重跑，第"+(i+1)+"次","成功","","lightgreen","");
                     break;
@@ -1398,224 +1518,254 @@ public class TestcaseService {
     }
 
     public RunHttpResultEntity runCase(Testcase testcase,String uuid,Map<String,Parameter> globalParamMap,Map<String,String> dsParamMap,Map<String,String> localParamMap) {
-        Exception ee = null;
-        long startTime = System.currentTimeMillis();
-        long httpCostTime ;
-        long totalCostTime ;
-        if(localParamMap == null){
-            localParamMap = Maps.newHashMap();
-        }
-        Map<String,String> httpResponseParamMap = Maps.newHashMap();
-        RunHttpResultEntity httpResult = new RunHttpResultEntity();
-        httpResult.setUuid(uuid);
-        try {
-            LogUtil.addLog(uuid,"开始执行测试用例","","white","green","");
-            LogUtil.addLog(uuid,"ID",testcase.getId()+"","blue","","");
-            LogUtil.addLog(uuid,"接口",testcase.getMethod(),"blue","","");
-            LogUtil.addLog(uuid,"环境",es.getNameById(testcase.getTestEnvId()),"blue","","");
-            LogUtil.addLog(uuid,"用例名称",testcase.getNote(),"blue","","");
-            //param
-            LogUtil.addLog(uuid,"打印参数-全局","开始","","lightyellow","");
-            String str = "";
-            for(String k : globalParamMap.keySet()){
-                str += k + "=" + globalParamMap.get(k).getKvVal() + "；";
-            }
-            LogUtil.addLog(uuid,"打印参数-全局","完成："+str,"","lightyellow","");
-            LogUtil.addLog(uuid,"打印参数-数据池","开始","","lightyellow","");
-            str = "";
-            for(String k : dsParamMap.keySet()){
-                str += k + "=" + dsParamMap.get(k) + "；";
-            }
-            LogUtil.addLog(uuid,"打印参数-数据池","完成："+str,"","lightyellow","");
-            //pre
-            LogUtil.addLog(uuid,"前置操作 开始","","","lightyellow","");
-            List<Operation> preOpsList = os.getByIdsInOrder(testcase.getPreOpsIds());
-            for(Operation operation : preOpsList){
-                os.runOps(new JSONObject(),"pre",uuid,operation,globalParamMap,dsParamMap,localParamMap,null);
-            }
-            LogUtil.addLog(uuid,"前置操作 完成","DONE","","lightyellow","");
-            //tc
-            LogUtil.addLog(uuid,"执行测试 开始","","","lightyellow","");
-            String postStr = testcase.getIsPost()?"POST":"GET";
-            Environment environment = es.getById(testcase.getTestEnvId());
-            String url = environment.getHostUrl() + testcase.getUrl().trim();
-            String parameters = testcase.getParameters().trim();
-            if(url.contains("${")){
-                url = pu.replaceParam(uuid,url,globalParamMap,dsParamMap,localParamMap);
-            }
-            if(parameters.contains("${")){
-                parameters = pu.replaceParam(uuid,parameters,globalParamMap,dsParamMap,localParamMap);
-            }
-            int projectId = environment.getProjectId();
-            Map<String,String> reqParams = Maps.newHashMap();
-            if(testcase.getIsPost()){
-                reqParams = pu.getReqParams(parameters);
-                parameters = pu.clientSecret(uuid,projectId,reqParams,true);
-            }else{
-                int idx = url.indexOf("?");
-                if(idx > 0){
-                    String url_pre = url.substring(0,idx+1).trim();
-                    String url_param = url.substring(idx+1).trim();
-                    if(!url_param.equals("")){
-                        reqParams = pu.getReqParams(url_param);
-                        url_param = pu.clientSecret(uuid,projectId,reqParams,false);
+        Callable<RunHttpResultEntity> task = new Callable<RunHttpResultEntity>(){
+            @Override
+            public RunHttpResultEntity call() throws Exception {
+                Exception ee = null;
+                long startTime = System.currentTimeMillis();
+                long httpCostTime ;
+                long totalCostTime ;
+                Map<String,String> httpResponseParamMap = Maps.newHashMap();
+                RunHttpResultEntity httpResult = new RunHttpResultEntity();
+                httpResult.setUuid(uuid);
+                try {
+                    LogUtil.addLog(uuid,"开始执行测试用例","","white","green","");
+                    LogUtil.addLog(uuid,"ID",testcase.getId()+"","blue","","");
+                    LogUtil.addLog(uuid,"接口",testcase.getMethod(),"blue","","");
+                    LogUtil.addLog(uuid,"环境",es.getNameById(testcase.getTestEnvId()),"blue","","");
+                    LogUtil.addLog(uuid,"用例名称",testcase.getNote(),"blue","","");
+                    //param
+                    LogUtil.addLog(uuid,"打印参数-全局","开始","","lightyellow","");
+                    String str = "";
+                    for(String k : globalParamMap.keySet()){
+                        str += k + "=" + globalParamMap.get(k).getKvVal() + "；";
                     }
-                    url = url_pre + url_param;
-                }
-            }
-            LogUtil.addLog(uuid,"获取cookie","开始","black","","");
-            String cookieList = testcase.getCookieList();
-            JSONArray cookieListArr = JSONArray.parseArray(cookieList);
-            List<Cookie> inputCookies = Lists.newArrayList();
-            String s = "";
-            String hostUrl = environment.getHostUrl();
-            String hostName = hostUrl.substring(hostUrl.indexOf("//")+2);
-            for(int i=0;i<cookieListArr.size();i++){
-                JSONObject o = cookieListArr.getJSONObject(i);
-                String k = o.getString("k").trim();
-                String v = o.getString("v").trim();
-                if(!k.equals("")){
-                    if(v.contains("${")){
-                        v = pu.replaceParam(uuid,v,globalParamMap,dsParamMap,localParamMap);
+                    LogUtil.addLog(uuid,"打印参数-全局","完成："+str,"","lightyellow","");
+                    LogUtil.addLog(uuid,"打印参数-数据池","开始","","lightyellow","");
+                    str = "";
+                    for(String k : dsParamMap.keySet()){
+                        str += k + "=" + dsParamMap.get(k) + "；";
                     }
-                    BasicClientCookie oBasicClientCookie = new BasicClientCookie(k,v);
-                    oBasicClientCookie.setDomain(hostName);
-                    oBasicClientCookie.setPath("/");
-                    inputCookies.add(oBasicClientCookie);
-                    s += k+"="+v+";";
-                }
-            }
-            LogUtil.addLog(uuid,"获取cookie","完成,cookies: "+s,"black","","");
-            LogUtil.addLog(uuid,"获取header","开始","black","","");
-            String headerList = testcase.getHeaderList();
-            JSONArray headerListArr = JSONArray.parseArray(headerList);
-            List<Header> inputHeaders = Lists.newArrayList();
-            s = "";
-            for(int i=0;i<headerListArr.size();i++){
-                JSONObject o = headerListArr.getJSONObject(i);
-                String k = o.getString("k").trim();
-                String v = o.getString("v").trim();
-                if(!k.equals("")){
-                    if(v.contains("${")){
-                        v = pu.replaceParam(uuid,v,globalParamMap,dsParamMap,localParamMap);
+                    LogUtil.addLog(uuid,"打印参数-数据池","完成："+str,"","lightyellow","");
+                    //pre
+                    LogUtil.addLog(uuid,"前置操作 开始","","","lightyellow","");
+                    List<Operation> preOpsList = os.getByIdsInOrder(testcase.getPreOpsIds());
+                    for(Operation operation : preOpsList){
+                        os.runOps(new JSONObject(),"pre",uuid,operation,globalParamMap,dsParamMap,localParamMap,httpResponseParamMap);
                     }
-                    inputHeaders.add(new BasicHeader(k,v));
-                    s += "["+k+":"+v+"],";
-                }
-            }
+                    LogUtil.addLog(uuid,"前置操作 完成","DONE","","lightyellow","");
+                    //tc
+                    LogUtil.addLog(uuid,"执行测试 开始","","","lightyellow","");
+                    String postStr = testcase.getIsPost()?"POST":"GET";
+                    Environment environment = es.getById(testcase.getTestEnvId());
+                    String hostParam = testcase.getHostParam();
+                    String hostParamValue = ps.getValByParamName(uuid,hostParam,globalParamMap,dsParamMap,localParamMap);
+                    String url = hostParamValue + testcase.getUrl().trim();
+                    String parameters = testcase.getParameters().trim();
+                    if(url.contains("${")){
+                        url = pu.replaceParam(uuid,url,globalParamMap,dsParamMap,localParamMap);
+                    }
+                    if(parameters.contains("${")){
+                        parameters = pu.replaceParam(uuid,parameters,globalParamMap,dsParamMap,localParamMap);
+                    }
+                    int projectId = environment.getProjectId();
+                    Map<String,String> reqParams = Maps.newHashMap();
+                    if(testcase.getIsPost()){
+                        reqParams = pu.getReqParams(parameters);
+                        parameters = pu.clientSecret(uuid,projectId,reqParams,true);
+                    }else{
+                        int idx = url.indexOf("?");
+                        if(idx > 0){
+                            String url_pre = url.substring(0,idx+1).trim();
+                            String url_param = url.substring(idx+1).trim();
+                            if(!url_param.equals("")){
+                                reqParams = pu.getReqParams(url_param);
+                                url_param = pu.clientSecret(uuid,projectId,reqParams,false);
+                            }
+                            url = url_pre + url_param;
+                        }
+                    }
+                    LogUtil.addLog(uuid,"获取cookie","开始","black","","");
+                    String cookieList = testcase.getCookieList();
+                    JSONArray cookieListArr = JSONArray.parseArray(cookieList);
+                    List<Cookie> inputCookies = Lists.newArrayList();
+                    String s = "";
+                    String hostName = hostParamValue.substring(hostParamValue.indexOf("//")+2);
+                    for(int i=0;i<cookieListArr.size();i++){
+                        JSONObject o = cookieListArr.getJSONObject(i);
+                        String k = o.getString("k").trim();
+                        String v = o.getString("v").trim();
+                        if(!k.equals("")){
+                            if(v.contains("${")){
+                                v = pu.replaceParam(uuid,v,globalParamMap,dsParamMap,localParamMap);
+                            }
+                            BasicClientCookie oBasicClientCookie = new BasicClientCookie(k,v);
+                            oBasicClientCookie.setDomain(hostName);
+                            oBasicClientCookie.setPath("/");
+                            inputCookies.add(oBasicClientCookie);
+                            s += k+"="+v+";";
+                        }
+                    }
+                    LogUtil.addLog(uuid,"获取cookie","完成,cookies: "+s,"black","","");
+                    LogUtil.addLog(uuid,"获取header","开始","black","","");
+                    String headerList = testcase.getHeaderList();
+                    JSONArray headerListArr = JSONArray.parseArray(headerList);
+                    List<Header> inputHeaders = Lists.newArrayList();
+                    s = "";
+                    for(int i=0;i<headerListArr.size();i++){
+                        JSONObject o = headerListArr.getJSONObject(i);
+                        String k = o.getString("k").trim();
+                        String v = o.getString("v").trim();
+                        if(!k.equals("")){
+                            if(v.contains("${")){
+                                v = pu.replaceParam(uuid,v,globalParamMap,dsParamMap,localParamMap);
+                            }
+                            inputHeaders.add(new BasicHeader(k,v));
+                            s += "["+k+":"+v+"],";
+                        }
+                    }
 
-            LogUtil.addLog(uuid,"添加验签","开始","black","","");
-            String sortedParamStr = SignatureVerifyUtil.getPramsString(reqParams);
-            String xNowVerifyType = SignatureVerifyUtil.VERIFY_TPYE_DOUBLE;
-            String headerS = "";
-            if(reqParams.containsKey("udid")){
-                String verify = SignatureVerifyUtil.getSignature(projectId,environment.getHostUrl(),sortedParamStr,reqParams,socketTimeout,connectTimeout);
-                if(projectId == ClientSecretUtil.NOW_PROJECT_ID || projectId == ClientSecretUtil.MARS_PROJECT_ID){
-                    if(verify != null){
-                        if(projectId == ClientSecretUtil.NOW_PROJECT_ID){
-                            inputHeaders.add(new BasicHeader("x-now-verify",verify));
-                            inputHeaders.add(new BasicHeader("x-now-verify-type",xNowVerifyType));
-                            LogUtil.addLog(uuid,"添加验签","完成,x-now-verify:"+verify+";x-now-verify-type:"+xNowVerifyType,"black","","");
-                            headerS += "[x-now-verify:"+verify+"][x-now-verify-type:"+xNowVerifyType+"]";
+                    LogUtil.addLog(uuid,"添加验签","开始","black","","");
+                    String sortedParamStr = SignatureVerifyUtil.getPramsString(reqParams);
+                    String xNowVerifyType = SignatureVerifyUtil.VERIFY_TPYE_DOUBLE;
+                    String headerS = "";
+                    if(reqParams.containsKey("udid")){
+                        String verify = SignatureVerifyUtil.getSignature(projectId,hostParamValue,sortedParamStr,reqParams,socketTimeout,connectTimeout);
+                        if(projectId == ClientSecretUtil.NOW_PROJECT_ID || projectId == ClientSecretUtil.MARS_PROJECT_ID){
+                            if(verify != null){
+                                if(projectId == ClientSecretUtil.NOW_PROJECT_ID){
+                                    inputHeaders.add(new BasicHeader("x-now-verify",verify));
+                                    inputHeaders.add(new BasicHeader("x-now-verify-type",xNowVerifyType));
+                                    LogUtil.addLog(uuid,"添加验签","完成,x-now-verify:"+verify+";x-now-verify-type:"+xNowVerifyType,"black","","");
+                                    headerS += "[x-now-verify:"+verify+"][x-now-verify-type:"+xNowVerifyType+"]";
+                                }else{
+                                    inputHeaders.add(new BasicHeader("x-mars-verify",verify));
+                                    inputHeaders.add(new BasicHeader("x-mars-verify-type",xNowVerifyType));
+                                    LogUtil.addLog(uuid,"添加验签","完成,x-mars-verify:"+verify+";x-mars-verify-type:"+xNowVerifyType,"black","","");
+                                    headerS += "[x-mars-verify:"+verify+"][x-mars-verify-type:"+xNowVerifyType+"]";
+                                }
+                            }else{
+                                LogUtil.addLog(uuid,"添加验签","验签信息为null，可能缺少必要参数，跳过验签","brown","","");
+                            }
                         }else{
-                            inputHeaders.add(new BasicHeader("x-mars-verify",verify));
-                            inputHeaders.add(new BasicHeader("x-mars-verify-type",xNowVerifyType));
-                            LogUtil.addLog(uuid,"添加验签","完成,x-mars-verify:"+verify+";x-mars-verify-type:"+xNowVerifyType,"black","","");
-                            headerS += "[x-mars-verify:"+verify+"][x-mars-verify-type:"+xNowVerifyType+"]";
+                            inputHeaders.add(new BasicHeader("x-yoho-verify",verify));
+                            LogUtil.addLog(uuid,"添加验签","完成,x-yoho-verify:"+verify,"black","","");
+                            headerS += "[x-yoho-verify:"+verify+"]";
                         }
                     }else{
-                        LogUtil.addLog(uuid,"添加验签","验签信息为null，可能缺少必要参数，跳过验签","brown","","");
+                        LogUtil.addLog(uuid,"添加验签","跳过，udid不存在","brown","","");
                     }
+                    LogUtil.addLog(uuid,"获取header","完成,headers: "+s+headerS,"black","","");
+
+                    LogUtil.addLog(uuid,"发送HTTP请求",postStr+" | "+url+" | "+parameters,"black","","");
+                    if(testcase.getIsPost()){
+                        httpResult = HttpUtil.doPost(url,parameters,inputCookies,inputHeaders,socketTimeout,connectTimeout);
+                    }else {
+                        httpResult = HttpUtil.doGet(url,parameters,inputCookies,inputHeaders,socketTimeout,connectTimeout);
+                    }
+                    httpResult.setUrl(url);
+                    httpResult.setParameters(parameters);
+                    httpCostTime = httpResult.getResponseTime();
+                    int httpCode = httpResult.getCode();
+                    String httpResponse = httpResult.getResponse();
+                    LogUtil.addLog(uuid,"HTTP请求耗时",httpCostTime + "ms","","","");
+                    LogUtil.addLog(uuid,"完成HTTP请求",httpResponse,"","","");
+                    LogUtil.addLog(uuid,"提取测试结果","开始","","","");
+                    String getHttpResList = testcase.getGetHttpResList();
+                    String getHttpResStr="";
+                    JSONArray arr = JSONArray.parseArray(getHttpResList);
+                    for(int i=0;i<arr.size();i++){
+                        JSONObject obj = arr.getJSONObject(i);
+                        if(obj != null){
+                            String paramName = obj.getString("k").trim();
+                            String jsonpath = obj.getString("v").trim();
+                            if(!paramName.equals("") && !jsonpath.equals("")){
+                                String paramVal = cpu.getValByJsonPath(httpResponse,jsonpath);
+                                if(paramVal == null){
+                                    LogUtil.addLog(uuid,"提取测试结果","[提取响应结果]：参数"+paramName+"，取值为null","orange","","");
+                                }else{
+                                    httpResponseParamMap.put(paramName,paramVal);
+                                    localParamMap.put(paramName,paramVal);
+                                    getHttpResStr += paramName + "=" + paramVal + ";";
+                                }
+                            }
+                        }
+                    }
+                    LogUtil.addLog(uuid,"提取测试结果","完成："+getHttpResStr,"","","");
+                    LogUtil.addLog(uuid,"执行测试 完成","DONE","","lightyellow","");
+                    //after
+                    LogUtil.addLog(uuid,"测试后操作 开始","","","lightyellow","");
+                    List<Operation> afterOpsList = os.getByIdsInOrder(testcase.getAfterTestOpsIds());
+                    for(Operation operation : afterOpsList){
+                        os.runOps(new JSONObject(),"after",uuid,operation,globalParamMap,dsParamMap,localParamMap,httpResponseParamMap);
+                    }
+                    LogUtil.addLog(uuid,"测试后操作 完成","DONE","","lightyellow","");
+                    //check point
+                    LogUtil.addLog(uuid,"检查点 开始","","","lightyellow","");
+                    cpu.doCheckPoint(uuid,httpCode,httpResponse,testcase.getHttpCodeCheck(),testcase.getContainCheck(),testcase.getNotContainCheck(),testcase.getJsonCheck(),testcase.getDbCheck(),globalParamMap,dsParamMap,localParamMap);
+                    LogUtil.addLog(uuid,"检查点 完成","DONE","","lightyellow","");
+                }catch (Exception e){
+                    ee = e;
+                    LogUtil.addLog(uuid,"用例 失败",e.toString(),"","lightpink","");
+                    e.printStackTrace();
+                }
+                Exception ee2 = null;
+                try{
+                    //post
+                    LogUtil.addLog(uuid,"后置操作 开始","","","lightyellow","");
+                    List<Operation> postOpsList = os.getByIdsInOrder(testcase.getPostOpsIds());
+                    for(Operation operation : postOpsList){
+                        os.runOps(new JSONObject(),"post",uuid,operation,globalParamMap,dsParamMap,localParamMap,httpResponseParamMap);
+                    }
+                    LogUtil.addLog(uuid,"后置操作 成功","DONE","","lightyellow","");
+                }catch (Exception e2){
+                    ee2 = e2;
+                    LogUtil.addLog(uuid,"后置操作 失败",e2.toString(),"","lightpink","");
+                    e2.printStackTrace();
+                }
+
+                long endTime = System.currentTimeMillis();
+                totalCostTime = endTime-startTime;
+                httpResult.setTotalTime(totalCostTime);
+                LogUtil.addLog(uuid,"全部完成","用例ID："+testcase.getId()+"，耗时："+totalCostTime + "ms","white","mediumpurple","");
+
+                if(ee == null && ee2 == null){
+                    httpResult.setPass(true);
+                    LogUtil.addLog(uuid,"用例执行结果","通过","","lightgreen","");
                 }else{
-                    inputHeaders.add(new BasicHeader("x-yoho-verify",verify));
-                    LogUtil.addLog(uuid,"添加验签","完成,x-yoho-verify:"+verify,"black","","");
-                    headerS += "[x-yoho-verify:"+verify+"]";
-                }
-            }else{
-                LogUtil.addLog(uuid,"添加验签","跳过，udid不存在","brown","","");
-            }
-            LogUtil.addLog(uuid,"获取header","完成,headers: "+s+headerS,"black","","");
-
-            LogUtil.addLog(uuid,"发送HTTP请求",postStr+" | "+url+" | "+parameters,"black","","");
-            httpResult.setUrl(url);
-            httpResult.setParameters(parameters);
-            if(testcase.getIsPost()){
-                httpResult = HttpUtil.doPost(url,parameters,inputCookies,inputHeaders,socketTimeout,connectTimeout);
-            }else {
-                httpResult = HttpUtil.doGet(url,parameters,inputCookies,inputHeaders,socketTimeout,connectTimeout);
-            }
-            httpCostTime = httpResult.getResponseTime();
-            int httpCode = httpResult.getCode();
-            String httpResponse = httpResult.getResponse();
-            LogUtil.addLog(uuid,"HTTP请求耗时",httpCostTime + "ms","","","");
-            LogUtil.addLog(uuid,"完成HTTP请求",httpResponse,"","","");
-            LogUtil.addLog(uuid,"提取测试结果","开始","","","");
-            String getHttpResList = testcase.getGetHttpResList();
-            String getHttpResStr="";
-            JSONArray arr = JSONArray.parseArray(getHttpResList);
-            for(int i=0;i<arr.size();i++){
-                JSONObject obj = arr.getJSONObject(i);
-                if(obj != null){
-                    String paramName = obj.getString("k").trim();
-                    String jsonpath = obj.getString("v").trim();
-                    if(!paramName.equals("") && !jsonpath.equals("")){
-                        String paramVal = cpu.getValByJsonPath(httpResponse,jsonpath);
-                        httpResponseParamMap.put(paramName,paramVal);
-                        localParamMap.put(paramName,paramVal);
-                        getHttpResStr += paramName + "=" + paramVal + ";";
+                    httpResult.setPass(false);
+                    if(ee == null && ee2 != null){
+                        ee = ee2;
                     }
+                    httpResult.setException(ee.toString());
+                    LogUtil.addLog(uuid,"用例执行结果","失败","white","deeppink","");
                 }
+                return httpResult;
             }
-            LogUtil.addLog(uuid,"提取测试结果","完成："+getHttpResStr,"","","");
-            LogUtil.addLog(uuid,"执行测试 完成","DONE","","lightyellow","");
-            //after
-            LogUtil.addLog(uuid,"测试后操作 开始","","","lightyellow","");
-            List<Operation> afterOpsList = os.getByIdsInOrder(testcase.getAfterTestOpsIds());
-            for(Operation operation : afterOpsList){
-                os.runOps(new JSONObject(),"after",uuid,operation,globalParamMap,dsParamMap,localParamMap,httpResponseParamMap);
-            }
-            LogUtil.addLog(uuid,"测试后操作 完成","DONE","","lightyellow","");
-            //check point
-            LogUtil.addLog(uuid,"检查点 开始","","","lightyellow","");
-            cpu.doCheckPoint(uuid,httpCode,httpResponse,testcase.getHttpCodeCheck(),testcase.getContainCheck(),testcase.getNotContainCheck(),testcase.getJsonCheck(),testcase.getDbCheck(),globalParamMap,dsParamMap,localParamMap);
-            LogUtil.addLog(uuid,"检查点 完成","DONE","","lightyellow","");
-        }catch (Exception e){
-            ee = e;
-            LogUtil.addLog(uuid,"用例 失败",e.toString(),"","lightpink","");
+        };
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+        Future<RunHttpResultEntity> future = executorService.submit(task);
+        RunHttpResultEntity result = new RunHttpResultEntity();
+        try {
+            result = future.get(testcaseTimeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            LogUtil.addLog(uuid,"用例执行结果","失败，中断异常："+e.toString(),"white","deeppink","");
             e.printStackTrace();
+            result.setPass(false);
+            result.setException("中断异常："+e.toString());
+        } catch (ExecutionException e) {
+            LogUtil.addLog(uuid,"用例执行结果","失败，执行异常："+e.toString(),"white","deeppink","");
+            e.printStackTrace();
+            result.setPass(false);
+            result.setException("执行异常："+e.toString());
+        } catch (TimeoutException e) {
+            LogUtil.addLog(uuid,"用例执行结果","失败，用例超时异常："+e.toString(),"white","deeppink","");
+            e.printStackTrace();
+            result.setPass(false);
+            result.setException("用例超时异常："+e.toString());
+        }finally {
+            executorService.shutdown();
         }
-        Exception ee2 = null;
-        try{
-            //post
-            LogUtil.addLog(uuid,"后置操作 开始","","","lightyellow","");
-            List<Operation> postOpsList = os.getByIdsInOrder(testcase.getPostOpsIds());
-            for(Operation operation : postOpsList){
-                os.runOps(new JSONObject(),"post",uuid,operation,globalParamMap,dsParamMap,localParamMap,httpResponseParamMap);
-            }
-            LogUtil.addLog(uuid,"后置操作 成功","DONE","","lightyellow","");
-        }catch (Exception e2){
-            ee2 = e2;
-            LogUtil.addLog(uuid,"后置操作 失败",e2.toString(),"","lightpink","");
-            e2.printStackTrace();
-        }
-
-        long endTime = System.currentTimeMillis();
-        totalCostTime = endTime-startTime;
-        httpResult.setTotalTime(totalCostTime);
-        LogUtil.addLog(uuid,"全部完成","用例ID："+testcase.getId()+"，耗时："+totalCostTime + "ms","white","mediumpurple","");
-
-        if(ee == null && ee2 == null){
-            httpResult.setPass(true);
-            LogUtil.addLog(uuid,"用例执行结果","通过","","lightgreen","");
-        }else{
-            httpResult.setPass(false);
-            if(ee == null && ee2 != null){
-                ee = ee2;
-            }
-            httpResult.setException(ee.toString());
-            LogUtil.addLog(uuid,"用例执行结果","失败","white","deeppink","");
-        }
-
-        return httpResult;
+        return result;
     }
 }

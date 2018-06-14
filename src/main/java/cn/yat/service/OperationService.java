@@ -241,6 +241,39 @@ public class OperationService{
         res.put("success", true);
         res.put("data", opsList);
     }
+    public List<Operation> getOpsByEnvId(int envId) throws Exception{
+        OperationExample example = new OperationExample();
+        OperationExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envId);
+        return operationMapper.selectByExample(example);
+    }
+    public Operation getById(int id) throws Exception{
+        return operationMapper.selectByPrimaryKey(id);
+    }
+    public int addOperation(Operation operation) throws Exception{
+        int ist = operationMapper.insert(operation);
+        if(ist > 0){
+            OperationExample example = new OperationExample();
+            OperationExample.Criteria criteria = example.createCriteria();
+            criteria.andEnvIdEqualTo(operation.getEnvId());
+            criteria.andNameEqualTo(operation.getName());
+            List<Operation> l = operationMapper.selectByExample(example);
+            if(l.size() > 0){
+                return l.get(0).getId();
+            }
+        }
+        return 0;
+    }
+    public void updateOperation(Operation operation) throws Exception{
+        operationMapper.updateByPrimaryKey(operation);
+    }
+    public void addBshJavaCode(int oldId,int newId) throws Exception{
+        BshJavaCode bshJavaCode = bshJavaCodeMapper.selectByPrimaryKey(oldId);
+        if(bshJavaCode != null){
+            bshJavaCode.setOpsId(newId);
+            bshJavaCodeMapper.insert(bshJavaCode);
+        }
+    }
     public void getJavaCodeByOpsId(JSONObject res ,String opsId) throws Exception{
         int opsIdInt = Integer.parseInt(opsId);
         BshJavaCode bshJavaCode = bshJavaCodeMapper.selectByPrimaryKey(opsIdInt);
@@ -266,10 +299,10 @@ public class OperationService{
         JSONObject oOperationJson = JSONObject.parseObject(operation);
         int opsId = oOperationJson.getIntValue("id");
         Operation oOperation = operationMapper.selectByPrimaryKey(opsId);
-        Map<String,Parameter> globalParamMap = pu.getGlobalParamMap(oOperation.getEnvId(),null);;
+        Map<String,Parameter> globalParamMap = pu.getGlobalParamMap(oOperation.getEnvId(),null);
         Map<String,String> dsParamMap = Maps.newHashMap();
         Map<String,String> localParamMap = Maps.newHashMap();
-        runOps(res , "debug",null,oOperation,globalParamMap,dsParamMap,localParamMap,null);
+        runOps(res , "debug",null,oOperation,globalParamMap,dsParamMap,localParamMap,Maps.newHashMap());
     }
     public void runOps(JSONObject res,String opsFlag,String uuid,Operation operation,Map<String,Parameter> globalParamMap,Map<String,String> dsParamMap,Map<String,String> localParamMap,Map<String,String> httpResponseParamMap) throws Exception{
         String title = "";
@@ -336,7 +369,7 @@ public class OperationService{
             int tcId = operation.getTcId();
             List<String> dataList = Lists.newArrayList();
             JSONArray tcValList = JSONArray.parseArray(operation.getTcValList());
-            LogUtil.addLog(uuid,title,"执行用例 开始：caseId="+tcId,"","","");
+            LogUtil.addLog(uuid,title,"执行用例 开始：caseId="+tcId,"white","darkorange","");
             Map<String,String> dsParamMapNew ;
             List<Map<String,String>> pList = ts.getDataSourceParamList(tcId);
             if(pList.size() > 0){
@@ -345,13 +378,13 @@ public class OperationService{
                 dsParamMapNew = new HashMap<>();
             }
             Testcase oTestcase = ts.getById(tcId);
-            //Map<String,Parameter> globalParamMapNew = pu.getGlobalParamMap(oTestcase.getTestEnvId(),null);
-            RunHttpResultEntity response = ts.runCase(oTestcase,null,globalParamMap,dsParamMapNew,httpResponseParamMap);
+//            Map<String,Parameter> globalParamMapNew = pu.getGlobalParamMap(oTestcase.getTestEnvId(),null);
+            RunHttpResultEntity response = ts.runCase(oTestcase,uuid,globalParamMap,dsParamMapNew,httpResponseParamMap);
             if(!response.isPass()){
                 LogUtil.addLog(uuid,title,"执行用例 失败：caseId="+tcId+"，原因："+response.getException(),"white","red","");
                 throw new Exception(response.getException());
             }
-            LogUtil.addLog(uuid,title,"执行用例 完成：caseId="+tcId,"","","");
+            LogUtil.addLog(uuid,title,"执行用例 完成：caseId="+tcId,"white","darkorange","");
             for(int i=0;i<tcValList.size();i++){
                 JSONObject o = tcValList.getJSONObject(i);
                 String headerName = o.getString("h").trim();
@@ -466,7 +499,7 @@ public class OperationService{
                     }
                 }
             }
-            Object ret = BeanShellUtil.execute(localParamMap,bshArgsArr,javaCode);
+            Object ret = BeanShellUtil.execute(localParamMap,httpResponseParamMap,bshArgsArr,javaCode);
             LogUtil.addLog(uuid,title,"执行JAVA代码：完成。返回结果："+ret,"blue","","");
             res.put("success", true);
             res.put("data", "执行JAVA代码：完成。返回结果："+ret);

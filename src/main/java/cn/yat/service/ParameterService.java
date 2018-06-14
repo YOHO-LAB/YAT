@@ -7,6 +7,7 @@ import cn.yat.util.*;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.jayway.jsonpath.JsonPath;
 import org.apache.http.Header;
 import org.apache.http.cookie.Cookie;
@@ -364,6 +365,24 @@ public class ParameterService {
         List<Parameter> paramList = parameterMapper.selectByExample(example);
         return paramList;
     }
+    public void getAllHostParamByEnvId(JSONObject res,String envId) throws Exception{
+        int envIdInt = Integer.parseInt(envId);
+        ParameterExample example = new ParameterExample();
+        ParameterExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envIdInt);
+        criteria.andNameLike("HOST%");
+        criteria.andParamTypeEqualTo(1);
+        List<Parameter> paramList = parameterMapper.selectByExample(example);
+        JSONArray arr = new JSONArray();
+        for(Parameter p : paramList){
+            JSONObject obj = new JSONObject();
+            obj.put("k",p.getName());
+            obj.put("v",p.getKvVal());
+            arr.add(obj);
+        }
+        res.put("success", true);
+        res.put("data", arr);
+    }
     public List<Parameter> getParamByEnvId(int envId) throws Exception{
         ParameterExample example = new ParameterExample();
         ParameterExample.Criteria criteria = example.createCriteria();
@@ -371,8 +390,27 @@ public class ParameterService {
         List<Parameter> paramList = parameterMapper.selectByExample(example);
         return paramList;
     }
-
-    private String getValOfGlobalParam(Parameter oParameter) throws Exception{
+    public Parameter getById(int id) throws Exception{
+        return parameterMapper.selectByPrimaryKey(id);
+    }
+    public int addParameter(Parameter parameter) throws Exception{
+        int ist = parameterMapper.insert(parameter);
+        if(ist > 0){
+            ParameterExample example = new ParameterExample();
+            ParameterExample.Criteria criteria = example.createCriteria();
+            criteria.andEnvIdEqualTo(parameter.getEnvId());
+            criteria.andNameEqualTo(parameter.getName());
+            List<Parameter> l = parameterMapper.selectByExample(example);
+            if(l.size() > 0){
+                return l.get(0).getId();
+            }
+        }
+        return 0;
+    }
+    public void updateParameter(Parameter parameter) throws Exception{
+        parameterMapper.updateByPrimaryKey(parameter);
+    }
+    private String getValOfGlobalParam(Map<String,Parameter> globalParamMap,Parameter oParameter) throws Exception{
         if(oParameter.getParamType() == 1){//KV
             return oParameter.getKvVal();
         }
@@ -397,7 +435,7 @@ public class ParameterService {
             String tcHeader = oParameter.getTcHeader();
             String tcCookie = oParameter.getTcCookie();
             String tcJsonPath = oParameter.getTcJsonPath();
-            String res = exeParamTc(oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
+            String res = exeParamTc(globalParamMap,oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
             oParameter.setParamType(1);
             oParameter.setKvVal(res);
             return res;
@@ -417,13 +455,12 @@ public class ParameterService {
             return val;
         }
         if(globalParamMap.containsKey(paramName)){
-            String res = getValOfGlobalParam(globalParamMap.get(paramName));
+            String res = getValOfGlobalParam(globalParamMap,globalParamMap.get(paramName));
             return res;
         }
         throw new Exception("参数 "+paramName+" ,取值失败！");
     }
     public void debugParameter(JSONObject res , String userId, String parameter) throws Exception{
-        int userIdInt = Integer.parseInt(userId);
         JSONObject oParameterJson = JSONObject.parseObject(parameter);
         int paramType = oParameterJson.getIntValue("paramType");
         if(paramType == 2){
@@ -453,22 +490,24 @@ public class ParameterService {
             String tcJsonPath = oParameterJson.getString("tcJsonPath").trim();
             String tcHeader = oParameterJson.getString("tcHeader").trim();
             String tcCookie = oParameterJson.getString("tcCookie").trim();
-            String val = exeParamTc(paramName,tcId,tcHeader,tcCookie,tcJsonPath);
+            String val = exeParamTc(null,paramName,tcId,tcHeader,tcCookie,tcJsonPath);
             res.put("success", true);
             res.put("data", val);
         }
     }
-    private String exeParamTc(String paramName , int tcId,String tcHeader,String tcCookie,String tcJsonPath) throws Exception{
+    private String exeParamTc(Map<String,Parameter> globalParamMap,String paramName , int tcId,String tcHeader,String tcCookie,String tcJsonPath) throws Exception{
         Map<String,String> dsParamMap ;
-        List<Map<String,String>> pList = ts.getDataSourceParamList(tcId);
         Testcase oTestcase = ts.getById(tcId);
-        Map<String,Parameter> globalParamMap = pu.getGlobalParamMap(oTestcase.getTestEnvId(),paramName);
+        if(globalParamMap == null){
+            globalParamMap = pu.getGlobalParamMap(oTestcase.getTestEnvId(),paramName);
+        }
+        List<Map<String,String>> pList = ts.getDataSourceParamList(tcId);
         if(pList.size() > 0){
             dsParamMap = pList.get(pList.size()-1);
         }else{
             dsParamMap = new HashMap<>();
         }
-        RunHttpResultEntity response = ts.runCase(oTestcase,null,globalParamMap,dsParamMap,null);
+        RunHttpResultEntity response = ts.runCase(oTestcase,null,globalParamMap,dsParamMap, Maps.newHashMap());
         if(!response.isPass()){
             throw new Exception("获取全局变量参数失败，参数名："+paramName+"，参数类型：执行测试用例，失败原因："+response.getException());
         }

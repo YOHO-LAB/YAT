@@ -9,7 +9,6 @@
     <result column="add_user_id" property="addUserId" jdbcType="INTEGER" />
     <result column="update_time" property="updateTime" jdbcType="TIMESTAMP" />
     <result column="update_user_id" property="updateUserId" jdbcType="INTEGER" />
-    <result column="host_url" property="hostUrl" jdbcType="VARCHAR" />
     <result column="project_id" property="projectId" jdbcType="INTEGER" />
   </resultMap>
   <sql id="Example_Where_Clause" >
@@ -71,7 +70,7 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, name, note, add_time, add_user_id, update_time, update_user_id, host_url, project_id
+    id, name, note, add_time, add_user_id, update_time, update_user_id, project_id
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.EnvironmentExample" >
     select
@@ -106,12 +105,10 @@
   <insert id="insert" parameterType="cn.yat.entity.Environment" >
     insert into environment (id, name, note, 
       add_time, add_user_id, update_time, 
-      update_user_id, host_url, project_id
-      )
+      update_user_id, project_id)
     values (#{id,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, #{note,jdbcType=VARCHAR}, 
       #{addTime,jdbcType=TIMESTAMP}, #{addUserId,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, 
-      #{updateUserId,jdbcType=INTEGER}, #{hostUrl,jdbcType=VARCHAR}, #{projectId,jdbcType=INTEGER}
-      )
+      #{updateUserId,jdbcType=INTEGER}, #{projectId,jdbcType=INTEGER})
   </insert>
   <insert id="insertSelective" parameterType="cn.yat.entity.Environment" >
     insert into environment
@@ -136,9 +133,6 @@
       </if>
       <if test="updateUserId != null" >
         update_user_id,
-      </if>
-      <if test="hostUrl != null" >
-        host_url,
       </if>
       <if test="projectId != null" >
         project_id,
@@ -165,9 +159,6 @@
       </if>
       <if test="updateUserId != null" >
         #{updateUserId,jdbcType=INTEGER},
-      </if>
-      <if test="hostUrl != null" >
-        #{hostUrl,jdbcType=VARCHAR},
       </if>
       <if test="projectId != null" >
         #{projectId,jdbcType=INTEGER},
@@ -204,9 +195,6 @@
       <if test="record.updateUserId != null" >
         update_user_id = #{record.updateUserId,jdbcType=INTEGER},
       </if>
-      <if test="record.hostUrl != null" >
-        host_url = #{record.hostUrl,jdbcType=VARCHAR},
-      </if>
       <if test="record.projectId != null" >
         project_id = #{record.projectId,jdbcType=INTEGER},
       </if>
@@ -224,7 +212,6 @@
       add_user_id = #{record.addUserId,jdbcType=INTEGER},
       update_time = #{record.updateTime,jdbcType=TIMESTAMP},
       update_user_id = #{record.updateUserId,jdbcType=INTEGER},
-      host_url = #{record.hostUrl,jdbcType=VARCHAR},
       project_id = #{record.projectId,jdbcType=INTEGER}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -251,9 +238,6 @@
       <if test="updateUserId != null" >
         update_user_id = #{updateUserId,jdbcType=INTEGER},
       </if>
-      <if test="hostUrl != null" >
-        host_url = #{hostUrl,jdbcType=VARCHAR},
-      </if>
       <if test="projectId != null" >
         project_id = #{projectId,jdbcType=INTEGER},
       </if>
@@ -268,7 +252,6 @@
       add_user_id = #{addUserId,jdbcType=INTEGER},
       update_time = #{updateTime,jdbcType=TIMESTAMP},
       update_user_id = #{updateUserId,jdbcType=INTEGER},
-      host_url = #{hostUrl,jdbcType=VARCHAR},
       project_id = #{projectId,jdbcType=INTEGER}
     where id = #{id,jdbcType=INTEGER}
   </update>

@@ -53,7 +53,6 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
         }
         $scope.errorInfo = "";
         $('#spinnersModal').modal('show');
-        console.log($scope.loginUser.id);
         $http.post('http://'+window.location.host+'/yat/api/user/post',{'method':'feedback','userId': $scope.loginUser.id, 'feedbackType':$scope.feedbackType,'feedbackData': $scope.feedbackData}).success(function (data) {
             $('#spinnersModal').modal('hide');
             if(data.success){
@@ -108,6 +107,25 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
                 return p;
             }
         }
+    }
+    $scope.openHostsModel = function () {
+        $http.post('http://'+window.location.host+'/yat/api/data/post',{'method':'getHosts'}).success(function (data) {
+            if(data.success){
+                $scope.hostsData = data.data;
+                $('#hostsModal').modal('show');
+            }else{
+                alert(data.data);
+            }
+        });
+    }
+    $scope.modifyHosts = function () {
+        $http.post('http://'+window.location.host+'/yat/api/data/post',{'method':'modifyHosts','userId': $scope.loginUser.id,'hostsData':$scope.hostsData}).success(function (data) {
+            if(data.success){
+                $('#hostsModal').modal('hide');
+            }else{
+                alert(data.data);
+            }
+        });
     }
     var user = $cookies.getObject("user");
     if(user == undefined || user == null){

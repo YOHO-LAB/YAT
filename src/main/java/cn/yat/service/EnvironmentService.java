@@ -33,13 +33,11 @@ public class EnvironmentService {
     @Autowired
     private RecordUtil ru;
 
-    public void addEnvironment(JSONObject res , String userId , String teamName , String teamNote,String hostUrl,String prjId) throws Exception{
+    public void addEnvironment(JSONObject res , String userId , String teamName , String teamNote,String prjId) throws Exception{
         int userIdInt = Integer.parseInt(userId);
         int prjIdInt = Integer.parseInt(prjId);
         Environment oEnvironment = new Environment();
         oEnvironment.setName(teamName);
-        hostUrl = editHostUrl(hostUrl);
-        oEnvironment.setHostUrl(hostUrl);
         oEnvironment.setNote(teamNote);
         oEnvironment.setProjectId(prjIdInt);
         Date now = new Date();
@@ -62,26 +60,12 @@ public class EnvironmentService {
             res.put("data", "insert failed");
         }
     }
-    private String editHostUrl(String hosturl) throws Exception{
-        hosturl = hosturl.trim();
-        int l = hosturl.length();
-        for(int i=l-1;i>=0;i--){
-            char c = hosturl.charAt(i);
-            if(c=='/' || c=='\\'){
-                hosturl = hosturl.substring(0,i);
-            }else{
-                break;
-            }
-        }
-        return hosturl;
-    }
     public void getEnvironment(JSONObject res , String search , String page , String count) throws Exception{
         int pageInt = Integer.parseInt(page);
         int countInt = Integer.parseInt(count);
         JSONObject oSearch = JSONObject.parseObject(search);
         //{"s_team_name":"","s_team_note":"","s_create_user":"","s_update_user":"","s_create_time":"","s_update_time":""}
         String s_team_name = oSearch.getString("s_team_name").trim();
-        String s_host_url = oSearch.getString("s_host_url").trim();
         String s_team_note = oSearch.getString("s_team_note").trim();
         String s_create_user = oSearch.getString("s_create_user").trim();
         String s_update_user = oSearch.getString("s_update_user").trim();
@@ -94,9 +78,6 @@ public class EnvironmentService {
         criteria.andProjectIdEqualTo(prjId);
         if(!s_team_name.equals("")){
             criteria.andNameLike("%"+s_team_name+"%");
-        }
-        if(!s_host_url.equals("")){
-            criteria.andHostUrlLike("%"+s_host_url+"%");
         }
         if(!s_team_note.equals("")){
             criteria.andNoteLike("%"+s_team_note+"%");
@@ -165,7 +146,7 @@ public class EnvironmentService {
         res.put("totalPage", totalPage);
     }
 
-    public void modifyEnvironment(JSONObject res , String userId , String envName , String envNote , String envId,String hostUrl,String prjId) throws Exception{
+    public void modifyEnvironment(JSONObject res , String userId , String envName , String envNote , String envId,String prjId) throws Exception{
         int userIdInt = Integer.parseInt(userId);
         int envIdInt = Integer.parseInt(envId);
         int prjIdInt = Integer.parseInt(prjId);
@@ -175,8 +156,6 @@ public class EnvironmentService {
         }
         oEnvironment.setName(envName);
         oEnvironment.setProjectId(prjIdInt);
-        hostUrl = editHostUrl(hostUrl);
-        oEnvironment.setHostUrl(hostUrl);
         oEnvironment.setNote(envNote);
         oEnvironment.setUpdateUserId(userIdInt);
         oEnvironment.setUpdateTime(new Date());

@@ -7,6 +7,7 @@
     <result column="status" property="status" jdbcType="INTEGER" />
     <result column="service_id" property="serviceId" jdbcType="INTEGER" />
     <result column="test_env_id" property="testEnvId" jdbcType="INTEGER" />
+    <result column="host_param" property="hostParam" jdbcType="VARCHAR" />
     <result column="method" property="method" jdbcType="VARCHAR" />
     <result column="is_post" property="isPost" jdbcType="BIT" />
     <result column="url" property="url" jdbcType="VARCHAR" />
@@ -87,10 +88,10 @@
     </where>
   </sql>
   <sql id="Base_Column_List" >
-    id, team_id, status, service_id, test_env_id, method, is_post, url, parameters, note, 
-    pre_ops_ids, after_test_ops_ids, post_ops_ids, http_code_check, contain_check, not_contain_check, 
-    json_check, db_check, add_time, add_user_id, update_time, update_user_id, cookie_list, 
-    header_list, get_http_res_list
+    id, team_id, status, service_id, test_env_id, host_param, method, is_post, url, parameters, 
+    note, pre_ops_ids, after_test_ops_ids, post_ops_ids, http_code_check, contain_check, 
+    not_contain_check, json_check, db_check, add_time, add_user_id, update_time, update_user_id, 
+    cookie_list, header_list, get_http_res_list
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.TestcaseExample" >
     select
@@ -124,8 +125,8 @@
   </delete>
   <insert id="insert" parameterType="cn.yat.entity.Testcase" >
     insert into testcase (id, team_id, status, 
-      service_id, test_env_id, method, 
-      is_post, url, parameters, 
+      service_id, test_env_id, host_param, 
+      method, is_post, url, parameters, 
       note, pre_ops_ids, after_test_ops_ids, 
       post_ops_ids, http_code_check, contain_check, 
       not_contain_check, json_check, db_check, 
@@ -133,8 +134,8 @@
       update_user_id, cookie_list, header_list, 
       get_http_res_list)
     values (#{id,jdbcType=INTEGER}, #{teamId,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
-      #{serviceId,jdbcType=INTEGER}, #{testEnvId,jdbcType=INTEGER}, #{method,jdbcType=VARCHAR}, 
-      #{isPost,jdbcType=BIT}, #{url,jdbcType=VARCHAR}, #{parameters,jdbcType=VARCHAR}, 
+      #{serviceId,jdbcType=INTEGER}, #{testEnvId,jdbcType=INTEGER}, #{hostParam,jdbcType=VARCHAR}, 
+      #{method,jdbcType=VARCHAR}, #{isPost,jdbcType=BIT}, #{url,jdbcType=VARCHAR}, #{parameters,jdbcType=VARCHAR}, 
       #{note,jdbcType=VARCHAR}, #{preOpsIds,jdbcType=VARCHAR}, #{afterTestOpsIds,jdbcType=VARCHAR}, 
       #{postOpsIds,jdbcType=VARCHAR}, #{httpCodeCheck,jdbcType=VARCHAR}, #{containCheck,jdbcType=VARCHAR}, 
       #{notContainCheck,jdbcType=VARCHAR}, #{jsonCheck,jdbcType=VARCHAR}, #{dbCheck,jdbcType=VARCHAR}, 
@@ -159,6 +160,9 @@
       </if>
       <if test="testEnvId != null" >
         test_env_id,
+      </if>
+      <if test="hostParam != null" >
+        host_param,
       </if>
       <if test="method != null" >
         method,
@@ -236,6 +240,9 @@
       </if>
       <if test="testEnvId != null" >
         #{testEnvId,jdbcType=INTEGER},
+      </if>
+      <if test="hostParam != null" >
+        #{hostParam,jdbcType=VARCHAR},
       </if>
       <if test="method != null" >
         #{method,jdbcType=VARCHAR},
@@ -323,6 +330,9 @@
       <if test="record.testEnvId != null" >
         test_env_id = #{record.testEnvId,jdbcType=INTEGER},
       </if>
+      <if test="record.hostParam != null" >
+        host_param = #{record.hostParam,jdbcType=VARCHAR},
+      </if>
       <if test="record.method != null" >
         method = #{record.method,jdbcType=VARCHAR},
       </if>
@@ -395,6 +405,7 @@
       status = #{record.status,jdbcType=INTEGER},
       service_id = #{record.serviceId,jdbcType=INTEGER},
       test_env_id = #{record.testEnvId,jdbcType=INTEGER},
+      host_param = #{record.hostParam,jdbcType=VARCHAR},
       method = #{record.method,jdbcType=VARCHAR},
       is_post = #{record.isPost,jdbcType=BIT},
       url = #{record.url,jdbcType=VARCHAR},
@@ -433,6 +444,9 @@
       </if>
       <if test="testEnvId != null" >
         test_env_id = #{testEnvId,jdbcType=INTEGER},
+      </if>
+      <if test="hostParam != null" >
+        host_param = #{hostParam,jdbcType=VARCHAR},
       </if>
       <if test="method != null" >
         method = #{method,jdbcType=VARCHAR},
@@ -503,6 +517,7 @@
       status = #{status,jdbcType=INTEGER},
       service_id = #{serviceId,jdbcType=INTEGER},
       test_env_id = #{testEnvId,jdbcType=INTEGER},
+      host_param = #{hostParam,jdbcType=VARCHAR},
       method = #{method,jdbcType=VARCHAR},
       is_post = #{isPost,jdbcType=BIT},
       url = #{url,jdbcType=VARCHAR},

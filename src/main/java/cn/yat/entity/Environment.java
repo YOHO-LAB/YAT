@@ -17,8 +17,6 @@ public class Environment {
 
     private Integer updateUserId;
 
-    private String hostUrl;
-
     private Integer projectId;
 
     public Integer getId() {
@@ -75,14 +73,6 @@ public class Environment {
 
     public void setUpdateUserId(Integer updateUserId) {
         this.updateUserId = updateUserId;
-    }
-
-    public String getHostUrl() {
-        return hostUrl;
-    }
-
-    public void setHostUrl(String hostUrl) {
-        this.hostUrl = hostUrl;
     }
 
     public Integer getProjectId() {

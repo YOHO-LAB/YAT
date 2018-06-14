@@ -6,7 +6,7 @@
    <commentGenerator>
   		<property name="suppressAllComments" value="true"/>  
     </commentGenerator>
-    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.104.28:3306/yat" userId="yat" password="aA@123456" />
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://192.168.104.43:3306/yat" userId="yat" password="123456" />
     <javaModelGenerator targetPackage="cn.yat.entity" targetProject="src/main/java" />
     <sqlMapGenerator targetPackage="cn.yat.mapper" targetProject="src/main/java" />
     <javaClientGenerator targetPackage="cn.yat.mapper" targetProject="src/main/java" type="XMLMAPPER" />
@@ -20,9 +20,7 @@
       <table schema="yat" tableName="parameter" ></table>
       <table schema="yat" tableName="db" ></table>
       <table schema="yat" tableName="operation" ></table>
-      <table schema="yat" tableName="run_summary" >
-          <columnOverride column="log" jdbcType="VARCHAR" />
-      </table>
+      <table schema="yat" tableName="run_summary" ></table>
       <table schema="yat" tableName="data_source_loop" >
           <columnOverride column="tr_list" jdbcType="VARCHAR" />
       </table>

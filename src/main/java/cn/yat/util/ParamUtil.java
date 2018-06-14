@@ -2,6 +2,7 @@ package cn.yat.util;
 
 import cn.yat.entity.Parameter;
 import cn.yat.service.ParameterService;
+import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +27,9 @@ public class ParamUtil {
             String matchStr = m.group(0);
             String matchKey = matchStr.substring(2,matchStr.length()-1);
             String matchVal = ps.getValByParamName(uuid,matchKey,globalParamMap,dsParamMap,localParamMap);
+            if(matchVal == null){
+                throw new Exception("参数"+matchKey+"，取值为null");
+            }
             newIpt = newIpt.replace(matchStr,matchVal);
             LogUtil.addLog(uuid,"参数替换",matchStr+" = "+matchVal,"darkorchid","","");
         }
@@ -75,6 +79,7 @@ public class ParamUtil {
         String clientSecret = ClientSecretUtil.getClientSecret(projectId,reqParams);
         reqParams.put("client_secret",clientSecret);
         List<String> array = new LinkedList<>();
+        JSONObject object = new JSONObject();
         for(String k : reqParams.keySet()){
             String v = reqParams.get(k);
             if(projectId == ClientSecretUtil.MARS_PROJECT_ID){
@@ -86,8 +91,15 @@ public class ParamUtil {
                 }
             }
             array.add(k+"="+v);
+            object.put(k,v);
         }
         LogUtil.addLog(uuid,"生成client_secret",clientSecret,"darkorchid","","");
+
+        // 解决parameters的问题
+        if(projectId == ClientSecretUtil.NOW_PROJECT_ID && reqParams.containsKey("parameters") && reqParams.get("parameters").equals("true")){
+            return "parameters="+object.toJSONString();
+        }
+
         return String.join("&", array);
     }
 

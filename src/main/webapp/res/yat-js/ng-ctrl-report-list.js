@@ -119,6 +119,26 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             // $('#spinnersModal').modal('hide');
         });
     }
+    $scope.delDebugLog = function () {
+        var userId = $scope.getUserId();
+        if(userId == undefined){
+            return;
+        }
+        if(confirm("确认删除调试记录？")){
+            $('#spinnersModal').modal('show');
+            $http.post('http://'+window.location.host+'/yat/api/tc',
+                {'method':'delDebugLog','userId':userId}
+            ).success(function (data) {
+                if(data.success){
+                    alert("[success]:已成功删除"+data.data+"条调试记录!");
+                    $scope.getDebugReport();
+                }else{
+                    alert("[Error]:"+data.data);
+                }
+                $('#spinnersModal').modal('hide');
+            });
+        }
+    }
 
     $scope.page = 1;
     $scope.totalPage = 0;

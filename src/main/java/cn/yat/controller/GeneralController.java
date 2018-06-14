@@ -56,6 +56,16 @@ public class GeneralController {
             e.printStackTrace();
         }
     }
+    @RequestMapping(value = "/tc", method = RequestMethod.GET)
+    public void getTc(HttpServletRequest request,HttpServletResponse response) {
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        try {
+            response.getWriter().write(tcs.get(request).toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
     @RequestMapping(value = "/tc", method = RequestMethod.POST)
     public void postTc(HttpServletRequest request,HttpServletResponse response) {
         response.setContentType("application/json");

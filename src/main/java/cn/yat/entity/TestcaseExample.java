@@ -405,6 +405,76 @@ public class TestcaseExample {
             return (Criteria) this;
         }
 
+        public Criteria andHostParamIsNull() {
+            addCriterion("host_param is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamIsNotNull() {
+            addCriterion("host_param is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamEqualTo(String value) {
+            addCriterion("host_param =", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamNotEqualTo(String value) {
+            addCriterion("host_param <>", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamGreaterThan(String value) {
+            addCriterion("host_param >", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamGreaterThanOrEqualTo(String value) {
+            addCriterion("host_param >=", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamLessThan(String value) {
+            addCriterion("host_param <", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamLessThanOrEqualTo(String value) {
+            addCriterion("host_param <=", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamLike(String value) {
+            addCriterion("host_param like", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamNotLike(String value) {
+            addCriterion("host_param not like", value, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamIn(List<String> values) {
+            addCriterion("host_param in", values, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamNotIn(List<String> values) {
+            addCriterion("host_param not in", values, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamBetween(String value1, String value2) {
+            addCriterion("host_param between", value1, value2, "hostParam");
+            return (Criteria) this;
+        }
+
+        public Criteria andHostParamNotBetween(String value1, String value2) {
+            addCriterion("host_param not between", value1, value2, "hostParam");
+            return (Criteria) this;
+        }
+
         public Criteria andMethodIsNull() {
             addCriterion("method is null");
             return (Criteria) this;

@@ -48,6 +48,17 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             }
         });
     }
+    $scope.getAllHostParamByEnvId = function () {
+        $http.post('http://'+window.location.host+'/yat/api/data',
+            {'method':'getAllHostParamByEnvId','envId':$scope.global.envId}
+        ).success(function (data) {
+            if(data.success){
+                $scope.hostParamList = data.data;
+            }else{
+                alert("[Error]:"+data.data);
+            }
+        });
+    }
     $scope.getAllServiceByPrjId = function () {
         $http.post('http://'+window.location.host+'/yat/api/data',
             {'method':'getAllServiceByPrjId','projectId':$scope.global.prjId}
@@ -635,6 +646,8 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             }else{
                 $scope.tc.parameters = $scope.ueRawData;
             }
+        } else{
+            $scope.tc.parameters = "";
         }
         $scope.showUeEditor = false;
     }
@@ -771,7 +784,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/tc',
             {'method':'testRunHttp','userId':userId,'isPost':$scope.tc.isPost,
-                'envId':$scope.tc.testEnvId,'url':fullUrl,'parameters':fullPostData,'preOpsIds':preOpsIds,
+                'envId':$scope.tc.testEnvId,'hostParam':$scope.tc.hostParam,'url':fullUrl,'parameters':fullPostData,'preOpsIds':preOpsIds,
                 'ueHeaderList':JSON.stringify($scope.ueHeaderList),
                 'ueCookieList':JSON.stringify($scope.ueCookieList),
                 'ueGetHttpResList':JSON.stringify($scope.ueGetHttpResList),
@@ -917,20 +930,6 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             $scope.tc.serviceId = e.params.data.id;
         });
     });
-    $scope.setEnvUrl = function (id) {
-        $http.post('http://'+window.location.host+'/yat/api/data',
-            {'method':'getEnvironmentByEnvId','envId':id}
-        ).success(function (data) {
-            if(data.success){
-                $scope.tc.testEnvUrl = data.data.hostUrl;
-            }else{
-                alert(data.data);
-            }
-        });
-    }
-
-
-
 
     $scope.global = $scope.getGlobalEnvId();
     $scope.caseId = $scope.getUrlParamValue("caseId");
@@ -954,7 +953,6 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
                     $scope.gotoHome();
                 }
                 $scope.tc.testEnvId = $scope.global.envId;
-                $scope.setEnvUrl($scope.tc.testEnvId);
 
                 $scope.ds = {'th':[],'tr':[]};
                 if($scope.NN(data.thList)){
@@ -986,7 +984,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         });
     }else{
         $scope.tc = {
-            'id':0, 'teamId':0,'status':2,'serviceId':0,'testEnvId':0,
+            'id':0, 'teamId':0,'status':2,'serviceId':0,'testEnvId':0,'hostParam':'HOST',
             'method':'','isPost':false,'url':'','parameters':'','note':'',
             'cookieList':'','headerList':'','getHttpResList':'',
             'preOpsIds':'','afterTestOpsIds':'','postOpsIds':'',
@@ -994,7 +992,6 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             'addTime':'','addUserId':'0','updateTime':'','updateUserId':'0'
         };
         $scope.tc.testEnvId = $scope.global.envId;
-        $scope.setEnvUrl($scope.tc.testEnvId);
         $scope.testcaseId = 0;
         $scope.preOpsList=[];
         $scope.afterOpsList=[];
@@ -1004,6 +1001,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     $scope.page = 1;
     $scope.totalPage = 0;
     $scope.totalCount = 0;
+    $scope.getAllHostParamByEnvId();
     $scope.getAllOpsByEnvId();
     $scope.getAllTeam();
     $scope.getAllServiceByPrjId();

@@ -47,12 +47,6 @@
                                         </div>
                                         <div class="col-lg-3">
                                             <div class="input-group">
-                                                <span class="input-group-addon"><strong>HOST_URL</strong></span>
-                                                <input class="form-control" ng-model="s_host_url"/>
-                                            </div>
-                                        </div>
-                                        <div class="col-lg-3">
-                                            <div class="input-group">
                                                 <span class="input-group-addon"><strong>环境说明</strong></span>
                                                 <input class="form-control" ng-model="s_team_note"/>
                                             </div>
@@ -63,7 +57,7 @@
                                                 <input class="form-control"  ng-model="s_create_user"/>
                                             </div>
                                         </div>
-                                        <div class="col-lg-3 m-t-xs">
+                                        <div class="col-lg-3">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><strong>修改者</strong></span>
                                                 <input class="form-control"  ng-model="s_update_user"/>
@@ -88,15 +82,13 @@
 
                                         <div class="col-lg-12 m-t-xs">
                                             <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
-                                        </div>
-                                        <div class="col-lg-12">
                                             <div style="text-align: center"><small>总共{{totalPage}}页，当前第{{page}}页</small></div>
                                         </div>
                                         <div class="col-lg-12">
                                             <table class="table table-hover">
                                                 <thead>
                                                 <tr>
-                                                    <th>环境名称</th><th>HOST_URL</th><th>环境说明</th>
+                                                    <th>环境名称</th><th>环境说明</th>
                                                     <th>创建者</th><th>创建时间</th><th>修改者</th><th>修改时间</th>
                                                     <th></th>
                                                 </tr>
@@ -104,7 +96,6 @@
                                                 <tbody>
                                                 <tr ng-repeat="tr in teamList">
                                                     <td>{{tr.name}}</td>
-                                                    <td>{{tr.hostUrl}}</td>
                                                     <td>{{tr.note}}</td>
                                                     <td>{{tr.addUserNameCn}}</td>
                                                     <td>{{tr.addTime | timeFilter}}</td>
@@ -145,12 +136,6 @@
                                                 <label class="control-label">环境名：</label>
                                                 <div class="">
                                                     <input type="text" class="form-control" ng-model="teamName"/>
-                                                </div>
-                                            </div>
-                                            <div class="form-group">
-                                                <label class="control-label">HOST_URL：</label>
-                                                <div class="">
-                                                    <input type="text" class="form-control" ng-model="hostUrl"/>
                                                 </div>
                                             </div>
                                             <div class="form-group">

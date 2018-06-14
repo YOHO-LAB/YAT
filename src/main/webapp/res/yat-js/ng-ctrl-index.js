@@ -1,3 +1,50 @@
+myAppModule.filter("sumFilter" , function(){
+    return function(input){
+        if(input!=undefined && input!=null){
+            var sum =0;
+            for(var i=0;i<input.length;i++){
+                if(!isNaN(input[i])){
+                    sum += parseInt(input[i]);
+                }
+            }
+            return sum;
+        }else{
+            return 0;
+        }
+    };
+});
+myAppModule.filter("sumFilter2" , function(){
+    return function(input,idx){
+        if(input != undefined){
+            var sum =0;
+            for(var i=0;i<input.length;i++){
+                if(!isNaN(input[i][idx+1])){
+                    sum += parseInt(input[i][idx+1]);
+                }
+            }
+            return sum;
+        }else{
+            return 0;
+        }
+    };
+});
+myAppModule.filter("sumFilter3" , function(){
+    return function(input){
+        if(input != undefined){
+            var sum =0;
+            for(var i=0;i<input.length;i++){
+                for(var j=1;j<input[i].length;j++){
+                    if(!isNaN(input[i][j])){
+                        sum += parseInt(input[i][j]);
+                    }
+                }
+            }
+            return sum;
+        }else{
+            return 0;
+        }
+    };
+});
 myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $http , $timeout , $interval, $cookies) {
 
     $scope.initSparkline = function (data) {
@@ -57,10 +104,10 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             }
         );
     }
-    $scope.getSummaryOfCase = function () {
+    $scope.getSummaryOfCaseNum = function () {
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/tc',
-            {'method':'getSummaryOfCase'}
+            {'method':'getSummaryOfCaseNum'}
         ).success(function (data) {
             if(data.success){
                 $scope.initSparkline(data.data);
@@ -74,10 +121,10 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             $('#spinnersModal').modal('hide');
         });
     }
-    $scope.getSummaryOfCi = function () {
+    $scope.getSummaryOfCiPassRate = function () {
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/tc',
-            {'method':'getSummaryOfCi'}
+            {'method':'getSummaryOfCiPassRate'}
         ).success(function (data) {
             if(data.success){
                 $scope.flotDashboard(data.data);
@@ -88,28 +135,13 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         });
     }
 
-    $scope.getSummaryOfTeamCase = function () {
+    $scope.getSummaryOfCase = function () {
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/tc',
-            {'method':'getSummaryOfTeamCase'}
+            {'method':'getSummaryOfCase'}
         ).success(function (data) {
             if(data.success){
-                $scope.thList = data.thList;
-                $scope.trList = data.trList;
-            }else{
-                alert("[Error]:"+data.data);
-            }
-            $('#spinnersModal').modal('hide');
-        });
-    }
-
-    $scope.getSummaryOfLastFiveCi = function () {
-        $('#spinnersModal').modal('show');
-        $http.post('http://'+window.location.host+'/yat/api/tc',
-            {'method':'getSummaryOfLastFiveCi'}
-        ).success(function (data) {
-            if(data.success){
-                $scope.lastFiveCiList = data.data;
+                $scope.tbList = data.data;
             }else{
                 alert("[Error]:"+data.data);
             }
@@ -118,8 +150,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     }
 
 
+    $scope.getSummaryOfCaseNum();
+    $scope.getSummaryOfCiPassRate();
     $scope.getSummaryOfCase();
-    $scope.getSummaryOfCi();
-    $scope.getSummaryOfTeamCase();
-    $scope.getSummaryOfLastFiveCi();
 });

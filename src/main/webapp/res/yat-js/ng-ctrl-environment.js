@@ -41,13 +41,9 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             $scope.errorInfo = "[Error]:环境名必须唯一且不能为空！";
             return;
         }
-        if(!$scope.NN($scope.hostUrl)){
-            $scope.errorInfo = "[Error]:HOST_URL不能为空！";
-            return;
-        }
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/data',
-            {'method':'addEnvironment','userId':userId,'teamName': $scope.teamName, 'teamNote':$scope.teamNote,'hostUrl':$scope.hostUrl,'prjId':$scope.global.prjId}
+            {'method':'addEnvironment','userId':userId,'teamName': $scope.teamName, 'teamNote':$scope.teamNote,'prjId':$scope.global.prjId}
             ).success(function (data) {
             if(data.success){
                 // $scope.getEnvironment();
@@ -61,7 +57,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     }
     
     $scope.getEnvironment = function () {
-        var search = {'s_team_name':$scope.trimVar($scope.s_team_name),'s_team_note':$scope.trimVar($scope.s_team_note),'s_host_url':$scope.trimVar($scope.s_host_url),
+        var search = {'s_team_name':$scope.trimVar($scope.s_team_name),'s_team_note':$scope.trimVar($scope.s_team_note),
             's_create_user':$scope.trimVar($scope.s_create_user),'s_update_user':$scope.trimVar($scope.s_update_user),
             's_create_time':$scope.trimVar($scope.s_create_time),'s_update_time':$scope.trimVar($scope.s_update_time),
             'prjId':$scope.global.prjId};
@@ -84,7 +80,6 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         $scope.editTitle = "新增环境";
         $scope.editButtonAdd = true;
         $scope.teamName = "";
-        $scope.hostUrl = "";
         $scope.teamNote = "";
         $scope.errorInfo = "";
     }
@@ -92,7 +87,6 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
         $scope.editTitle = "修改环境";
         $scope.editButtonAdd = false;
         $scope.teamName = tr.name;
-        $scope.hostUrl = tr.hostUrl;
         $scope.teamNote = tr.note;
         $scope.errorInfo = "";
         $scope.editTr = tr;
@@ -104,13 +98,9 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             $scope.errorInfo = "[Error]:环境名必须唯一且必能为空！";
             return;
         }
-        if(!$scope.NN($scope.hostUrl)){
-            $scope.errorInfo = "[Error]:HOST_URL不能为空！";
-            return;
-        }
         $('#spinnersModal').modal('show');
         $http.post('http://'+window.location.host+'/yat/api/data',
-            {'method':'modifyEnvironment','userId':userId,'teamName': $scope.teamName, 'teamNote':$scope.teamNote,'teamId':$scope.editTr.id,'hostUrl':$scope.hostUrl,'prjId':$scope.global.prjId}
+            {'method':'modifyEnvironment','userId':userId,'teamName': $scope.teamName, 'teamNote':$scope.teamNote,'teamId':$scope.editTr.id,'prjId':$scope.global.prjId}
         ).success(function (data) {
             if(data.success){
                 // $scope.getEnvironment();

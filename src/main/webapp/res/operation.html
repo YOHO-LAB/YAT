@@ -248,7 +248,7 @@
                                                 <div class="col-lg-10">
                                                     <i class="text-muted">参数：以空格分割的一组入参，可以是${}引用参数，参数存储于字符串数组bsh.args[]中</i>
                                                     <br>
-                                                    <i class="text-muted">java方法：一段可执行的java代码，执行结果可以通过vars.put("","")方法，放入全局变量中</i>
+                                                    <i class="text-muted">java方法：一段可执行的java代码，执行结果可以通过vars.put("param","value")方法，放入局部变量中；通过varsHttp.put("param","value")方法，放入http响应变量中，此变量可传递给测试后步骤以及后置步骤。</i>
                                                 </div>
                                             </div>
                                             <div class="form-group">

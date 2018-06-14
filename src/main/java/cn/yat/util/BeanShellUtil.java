@@ -11,11 +11,12 @@ import java.util.Map;
  */
 public class BeanShellUtil {
 
-    public static Object execute(Map<String,String> vars,String[] args,String javaCode) throws Exception{
+    public static Object execute(Map<String,String> vars,Map<String,String> varsHttp,String[] args,String javaCode) throws Exception{
         Interpreter interpreter = new Interpreter();
         Object ret ;
         try {
             interpreter.set("vars",vars);
+            interpreter.set("varsHttp",varsHttp);
             interpreter.set("bsh.args",args);
             ret = interpreter.eval(javaCode);
         } catch ( TargetError e ) {

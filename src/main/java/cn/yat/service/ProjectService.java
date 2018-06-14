@@ -51,7 +51,7 @@ public class ProjectService {
             criteria.andNameEqualTo(teamName);
             List<Project> projectList = projectMapper.selectByExample(example);
             int prjId = projectList.get(0).getId();
-            es.addEnvironment(new JSONObject(),userId,"空，请修改！","","http://xxx.xxx.xxx",prjId+"");
+            es.addEnvironment(new JSONObject(),userId,"空，请修改！","",prjId+"");
             ru.addRecord(userIdInt,"addTeam",prjId+"");
             res.put("success", true);
             res.put("data", "insert success");

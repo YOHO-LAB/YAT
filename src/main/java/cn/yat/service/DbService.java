@@ -222,6 +222,26 @@ public class DbService {
         res.put("success", true);
         res.put("data", teamList);
     }
+    public List<Db> getDbByEnvId(int envId) throws Exception{
+        DbExample example = new DbExample();
+        DbExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envId);
+        return dbMapper.selectByExample(example);
+    }
+    public int addDb(Db db) throws Exception{
+        int ist = dbMapper.insert(db);
+        if(ist > 0){
+            DbExample example = new DbExample();
+            DbExample.Criteria criteria = example.createCriteria();
+            criteria.andEnvIdEqualTo(db.getEnvId());
+            criteria.andNameEqualTo(db.getName());
+            List<Db> l = dbMapper.selectByExample(example);
+            if(l.size() > 0){
+                return l.get(0).getId();
+            }
+        }
+        return 0;
+    }
     public Db getDbById(int dbId) throws Exception{
         return dbMapper.selectByPrimaryKey(dbId);
     }

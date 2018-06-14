@@ -1,6 +1,7 @@
 package cn.yat.service;
 
 import cn.yat.entity.*;
+import cn.yat.util.CmdUtil;
 import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,9 +53,8 @@ public class DataService {
                     ss.addService(res, userId , teamName,teamNote,prjId);
                 }
                 if(method.equals("addEnvironment")){
-                    String hostUrl = request.getParameter("hostUrl");
                     String prjId = request.getParameter("prjId");
-                    es.addEnvironment(res, userId , teamName,teamNote,hostUrl,prjId);
+                    es.addEnvironment(res, userId , teamName,teamNote,prjId);
                 }
                 if(method.equals("addDb")){
                     String db_ip = request.getParameter("db_ip");
@@ -104,8 +104,7 @@ public class DataService {
                 }
                 if(method.equals("modifyEnvironment")){
                     String prjId = request.getParameter("prjId");
-                    String hostUrl = request.getParameter("hostUrl");
-                    es.modifyEnvironment(res, userId , teamName,teamNote,teamId,hostUrl,prjId);
+                    es.modifyEnvironment(res, userId , teamName,teamNote,teamId,prjId);
                 }
                 if(method.equals("modifyDb")){
                     String db_ip = request.getParameter("db_ip");
@@ -218,6 +217,10 @@ public class DataService {
                 String parameter = request.getParameter("parameter");
                 ps.debugParameter(res,userId,parameter);
             }
+            if(method.equals("getAllHostParamByEnvId")){
+                String envId = request.getParameter("envId");
+                ps.getAllHostParamByEnvId(res,envId);
+            }
             //operation
             if(method.equals("addOps")){
                 String userId = request.getParameter("userId");
@@ -256,6 +259,14 @@ public class DataService {
                 String opsId = request.getParameter("opsId");
                 os.getJavaCodeByOpsId(res,opsId);
             }
+            // hosts
+            if(method.equals("getHosts")){
+                getHosts(res);
+            }
+            if(method.equals("modifyHosts")){
+                String hostsData = request.getParameter("hostsData");
+                modifyHosts(res,hostsData);
+            }
         }catch(Exception e){
             e.printStackTrace();
             res.put("success", false);
@@ -263,4 +274,25 @@ public class DataService {
         }
         return res;
     }
+    public void getHosts(JSONObject res) throws Exception{
+        if(System.getProperty("os.name").toLowerCase().indexOf("windows")>=0){
+            res.put("success", false);
+            res.put("data", "Windows 系统，无法获取Hosts");
+        }else{
+            String cmdRes = CmdUtil.doCmdStr("cat /etc/hosts");
+            res.put("success", true);
+            res.put("data", cmdRes);
+        }
+    }
+    public void modifyHosts(JSONObject res,String hostsData) throws Exception{
+        if(System.getProperty("os.name").toLowerCase().indexOf("windows")>=0){
+            res.put("success", false);
+            res.put("data", "Windows 系统，无法获取Hosts");
+        }else{
+            CmdUtil.doCmd("echo \""+hostsData+"\" > /etc/hosts");
+            res.put("success", true);
+            res.put("data", "modify success");
+        }
+    }
+
 }

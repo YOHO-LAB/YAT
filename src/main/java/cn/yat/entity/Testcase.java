@@ -13,6 +13,8 @@ public class Testcase {
 
     private Integer testEnvId;
 
+    private String hostParam;
+
     private String method;
 
     private Boolean isPost;
@@ -91,6 +93,14 @@ public class Testcase {
 
     public void setTestEnvId(Integer testEnvId) {
         this.testEnvId = testEnvId;
+    }
+
+    public String getHostParam() {
+        return hostParam;
+    }
+
+    public void setHostParam(String hostParam) {
+        this.hostParam = hostParam;
     }
 
     public String getMethod() {

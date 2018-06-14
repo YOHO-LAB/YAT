@@ -88,7 +88,7 @@
                         <div class="col-lg-12">
                             <div class="ibox">
                                 <div class="ibox-title">
-                                    <h5>URL编辑器 </h5>
+                                    <h5>URL编辑器 <small> 自定义host_url全局变量需以HOST开头</small></h5>
                                     <div class="ibox-tools">
                                         <button class="btn btn-xs btn-default btn-outline" ng-click="showUeEditor=false"><i class="fa fa-arrow-circle-left"> 取消&返回</i></button>
                                         <button class="btn btn-xs btn-primary btn-outline" ng-click="ueEnsureAndReturn()"><i class="fa fa-arrow-circle-left"> 确认&返回</i></button>
@@ -108,7 +108,15 @@
                                                                 <li><a href="" ng-click="tc.isPost=false">GET</a></li>
                                                                 <li><a href="" ng-click="tc.isPost=true">POST</a></li>
                                                             </ul>
-                                                            <button class="btn btn-white" type="button"><span>{{tc.testEnvUrl}}</span></button>
+                                                            <!--<button class="btn btn-white" type="button"><span>{{tc.testEnvUrl}}</span></button>-->
+                                                        </div>
+                                                        <div class="input-group-btn">
+                                                            <button data-toggle="dropdown" class="btn btn-white dropdown-toggle" type="button">
+                                                                <span>${ {{tc.hostParam}} }</span>
+                                                                <span class="caret"></span></button>
+                                                            <ul class="dropdown-menu">
+                                                                <li ng-repeat="li in hostParamList"><a href="" ng-click="tc.hostParam=li.k">${ {{li.k}} } : {{li.v}}</a></li>
+                                                            </ul>
                                                         </div>
                                                         <input type="text" class="form-control" ng-model="ueUri" placeholder="只填URI,不用带参数"/>
                                                         <div class="input-group-btn">
@@ -397,7 +405,7 @@
                                                     <div class="input-group">
                                                         <p ><strong ng-show="!tc.isPost">GET</strong> <strong ng-show="tc.isPost">POST</strong> <a ng-click="clickOpenUeEditor()" class="btn btn-xs btn-white"><strong class="text-warning">打开URL编辑器</strong></a></p>
 
-                                                        <p class="yatWrap" style="background-color: lightyellow">{{tc.testEnvUrl}}{{tc.url}}</p>
+                                                        <p class="yatWrap" style="background-color: lightyellow">${ {{tc.hostParam}} }{{tc.url}}</p>
                                                         <p ng-show="tc.isPost"><strong>POST Data：</strong></p>
                                                         <p class="yatWrap" ng-show="tc.isPost">{{tc.parameters}}</p>
                                                         <div class="col-lg-4">
@@ -470,7 +478,7 @@
                                                         <div class="input-group">
                                                             <span class="input-group-addon" style="background-color:darkorchid;color: white" ng-if="li.if!=undefined">If控制器</span>
                                                             <input type="text" placeholder="JsonPath" class="form-control" ng-model="li.k">
-                                                            <span class="input-group-addon" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
+                                                            <span class="input-group-addon btn" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
                                                             <input type="text" placeholder="" class="form-control" ng-model="li.v">
                                                             <span class="input-group-addon btn" ng-click="delCheckPoint('json',$index)"><i class="fa fa-close text-danger"></i></span>
                                                         </div>
@@ -479,7 +487,7 @@
                                                                 <div ng-repeat="ifLi in li.if  track by $index">
                                                                     <div class="input-group m-t">
                                                                         <input type="text" placeholder="JsonPath" class="form-control" ng-model="ifLi.k">
-                                                                        <span class="input-group-addon" ng-click="openSelectCompareTypeModal(ifLi)">{{ifLi.t}}</span>
+                                                                        <span class="input-group-addon btn" ng-click="openSelectCompareTypeModal(ifLi)">{{ifLi.t}}</span>
                                                                         <input type="text" placeholder="" class="form-control" ng-model="ifLi.v">
                                                                         <span class="input-group-addon btn" ng-click="delCheckPoint('json',$parent.$index,true,$index)"><i class="fa fa-close text-danger"></i></span>
                                                                     </div>
@@ -498,7 +506,7 @@
                                                 <div class="col-lg-9">
                                                     <div class="input-group m-b" ng-repeat="li in paramCheckList">
                                                         <input type="text" placeholder="ParamName" class="form-control" ng-model="li.k">
-                                                        <span class="input-group-addon" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
+                                                        <span class="input-group-addon btn" ng-click="openSelectCompareTypeModal(li)">{{li.t}}</span>
                                                         <input type="text" placeholder="" class="form-control" ng-model="li.v">
                                                         <span class="input-group-addon btn" ng-click="delCheckPoint('param',$index)"><i class="fa fa-close text-danger"></i></span>
                                                     </div>

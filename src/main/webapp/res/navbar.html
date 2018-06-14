@@ -22,6 +22,8 @@
                     <li class="divider"></li>
                     <li><a href="environment.html"> 测试环境维护</a></li>
                     <li><a href="service.html"> 服务名维护</a></li>
+                    <li class="divider"></li>
+                    <li><a href="" ng-click="openHostsModel()"> 测试机Hosts维护</a></li>
                 </ul>
             </li>
             <!--<li ng-class="{'active':tabName=='TestEnv'}"><a aria-expanded="false" role="button" href="env.html"> 测试环境</a></li>-->
@@ -124,6 +126,35 @@
                 <strong class="text-danger pull-left">{{errorInfo}}</strong>
                 <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
                 <button type="button" class="btn btn-primary" ng-click="doFeedback()">提交反馈</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal inmodal fade" id="hostsModal" tabindex="-2" role="dialog"  aria-hidden="true" data-backdrop="static">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title">测试机Hosts维护</h4>
+                <small class="font-bold"></small>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <form class="m-t" role="form">
+                        <div class="form-group">
+                            <div class="col-lg-12 m-t" style="padding-left: 0px;">
+                                <textarea class="form-control" rows="15" ng-model="$parent.hostsData"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <strong class="text-danger pull-left">{{errorInfo}}</strong>
+                <button type="button" class="btn btn-white" data-dismiss="modal">取消</button>
+                <button type="button" class="btn btn-primary" ng-click="modifyHosts()">确认修改</button>
             </div>
         </div>
     </div>
