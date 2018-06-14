@@ -935,7 +935,7 @@ public class TestcaseService {
             JSONObject object = new JSONObject();
             object.put("name",project.getName());
             List<Environment> envList = es.getAllEnvironmentByPrjId(project.getId());
-            List<cn.yoho.yat.entity.Service> srvList = ss.getAllServiceByPrjId(project.getId());
+            List<cn.yat.entity.Service> srvList = ss.getAllServiceByPrjId(project.getId());
             int thSize = envList.size();
             List<String> thList = Lists.newArrayList();
             for(int i=0;i<thSize;i++){
@@ -943,7 +943,7 @@ public class TestcaseService {
             }
             object.put("thList",thList);
             JSONArray trList = new JSONArray();
-            for(cn.yoho.yat.entity.Service s : srvList){
+            for(cn.yat.entity.Service s : srvList){
                 JSONArray tdArr = new JSONArray();
                 tdArr.add(s.getName());
                 for(int i=0;i<thSize;i++){
@@ -1233,9 +1233,9 @@ public class TestcaseService {
         List<Project> projectList = prjs.getAllProject();
         Map<String ,Map<String,int[]>> map = Maps.newHashMap();
         for(Project p : projectList){
-            List<cn.yoho.yat.entity.Service> serviceList = ss.getAllServiceByPrjId(p.getId());
+            List<cn.yat.entity.Service> serviceList = ss.getAllServiceByPrjId(p.getId());
             List<Environment> envList = es.getAllEnvironmentByPrjId(p.getId());
-            for(cn.yoho.yat.entity.Service s : serviceList){
+            for(cn.yat.entity.Service s : serviceList){
                 map.put(p.getName()+"-"+s.getName(),Maps.newHashMap());
                 for(Environment e : envList){
                     map.get(p.getName()+"-"+s.getName()).put(p.getName()+"-"+e.getName(),new int[4]);
@@ -1298,7 +1298,7 @@ public class TestcaseService {
                 "</table>\n" +
                 "<br>\n";
         for(Project p : projectList){
-            List<cn.yoho.yat.entity.Service> serviceList2 = ss.getAllServiceByPrjId(p.getId());
+            List<cn.yat.entity.Service> serviceList2 = ss.getAllServiceByPrjId(p.getId());
             List<Environment> envList2 = es.getAllEnvironmentByPrjId(p.getId());
             msg +=  "<table border=\"2\" cellspacing=\"0\" style=\"border:1px solid #e7e7e7\">\n" +
                     "<tr style=\"background-color:#F5F5F6;border:1px solid #e7e7e7\" align=\"center\">\n" +
@@ -1316,7 +1316,7 @@ public class TestcaseService {
                         "<th style=\"border:1px solid #e7e7e7\">用例总数</th>\n";
             }
             msg +=  "</tr>\n";
-            for(cn.yoho.yat.entity.Service s : serviceList2){
+            for(cn.yat.entity.Service s : serviceList2){
                 msg += "<tr align=\"center\">\n" +
                         "<td style=\"background-color:lightcyan;border:1px solid #e7e7e7\">"+s.getName()+"</td>\n";
                 for(Environment e : envList2){
