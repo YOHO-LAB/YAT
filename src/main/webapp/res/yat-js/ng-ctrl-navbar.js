@@ -109,7 +109,7 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
         }
     }
     $scope.openHostsModel = function () {
-        $http.post('http://'+window.location.host+'/yat/api/data/post',{'method':'getHosts'}).success(function (data) {
+        $http.post('http://'+window.location.host+'/yat/api/data',{'method':'getHosts'}).success(function (data) {
             if(data.success){
                 $scope.hostsData = data.data;
                 $('#hostsModal').modal('show');
@@ -119,7 +119,7 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
         });
     }
     $scope.modifyHosts = function () {
-        $http.post('http://'+window.location.host+'/yat/api/data/post',{'method':'modifyHosts','userId': $scope.loginUser.id,'hostsData':$scope.hostsData}).success(function (data) {
+        $http.post('http://'+window.location.host+'/yat/api/data',{'method':'modifyHosts','userId': $scope.loginUser.id,'hostsData':$scope.hostsData}).success(function (data) {
             if(data.success){
                 $('#hostsModal').modal('hide');
             }else{
