@@ -90,6 +90,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
                 $scope.caseList = data.data;
                 $scope.totalPage = data.totalPage;
                 $scope.totalCount = data.totalCount;
+                $scope.allSearchCaseIds = data.allSearchCaseIds;
                 $('#pageLimit').bootstrapPaginator("setOptions",{'currentPage':$scope.page,'totalPages':data.totalPage});
             }else{
                 $scope.errorInfo = "[Error]:"+data.data;
@@ -110,17 +111,10 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             alert("搜索结果中无用例！");
             return;
         }
-        var testcaseIds = "";
-        for(var i=0;i<length;i++){
-            testcaseIds += $scope.caseList[i].id;
-            if(i < length-1){
-                testcaseIds += ",";
-            }
-        }
         if(confirm("确认要执行当前搜索出来的"+$scope.totalCount+"条用例？")){
             $('#spinnersModal').modal('show');
             $http.post('http://'+window.location.host+'/yat/api/tc',
-                {'method':'runDailyCiManually','userId':userId,'subject':'手动触发CI-调试执行搜索用例','testcaseIds':testcaseIds}
+                {'method':'runDailyCiManually','userId':userId,'subject':'手动触发CI-调试执行搜索用例','testcaseIds':$scope.allSearchCaseIds}
             ).success(function (data) {
                 if(data.success){
                     alert(data.data);

@@ -548,7 +548,12 @@ public class TestcaseService {
                 throw new Exception("修改时间("+s_update_time+")格式不正确，请检查！");
             }
         }
-        int totalCount = testcaseMapper.countByExample(example);
+        List<Testcase> allSearchCaseList = testcaseMapper.selectByExample(example);
+        int totalCount = allSearchCaseList.size();
+        String allSearchCaseIds = "";
+        for(Testcase testcase : allSearchCaseList){
+            allSearchCaseIds += testcase.getId() + ",";
+        }
         int totalPage = (int)Math.ceil(totalCount/Double.parseDouble(count));
         totalPage = totalPage==0?1:totalPage;
         example.setOrderByClause("id limit "+(pageInt-1)*countInt+","+countInt);
@@ -569,6 +574,7 @@ public class TestcaseService {
         res.put("data", arr);
         res.put("totalCount", totalCount);
         res.put("totalPage", totalPage);
+        res.put("allSearchCaseIds", allSearchCaseIds);
     }
     public String getNameById(int id) throws Exception{
         String res = "";
@@ -1143,9 +1149,11 @@ public class TestcaseService {
         if(!testcaseIds.equals("")){
             List<Integer> cidList = Lists.newArrayList();
             for(String s : testcaseIds.split(",")){
-                int cid = Integer.parseInt(s);
-                if(cid > 0){
-                    cidList.add(cid);
+                if(!s.trim().equals("")){
+                    int cid = Integer.parseInt(s);
+                    if(cid > 0){
+                        cidList.add(cid);
+                    }
                 }
             }
             TestcaseExample example = new TestcaseExample();
