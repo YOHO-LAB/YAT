@@ -1584,6 +1584,136 @@ public class ParameterExample {
             addCriterion("tc_header not between", value1, value2, "tcHeader");
             return (Criteria) this;
         }
+
+        public Criteria andIsUseDefaultIsNull() {
+            addCriterion("is_use_default is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultIsNotNull() {
+            addCriterion("is_use_default is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultEqualTo(Integer value) {
+            addCriterion("is_use_default =", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultNotEqualTo(Integer value) {
+            addCriterion("is_use_default <>", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultGreaterThan(Integer value) {
+            addCriterion("is_use_default >", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultGreaterThanOrEqualTo(Integer value) {
+            addCriterion("is_use_default >=", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultLessThan(Integer value) {
+            addCriterion("is_use_default <", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultLessThanOrEqualTo(Integer value) {
+            addCriterion("is_use_default <=", value, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultIn(List<Integer> values) {
+            addCriterion("is_use_default in", values, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultNotIn(List<Integer> values) {
+            addCriterion("is_use_default not in", values, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultBetween(Integer value1, Integer value2) {
+            addCriterion("is_use_default between", value1, value2, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andIsUseDefaultNotBetween(Integer value1, Integer value2) {
+            addCriterion("is_use_default not between", value1, value2, "isUseDefault");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueIsNull() {
+            addCriterion("default_value is null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueIsNotNull() {
+            addCriterion("default_value is not null");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueEqualTo(String value) {
+            addCriterion("default_value =", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueNotEqualTo(String value) {
+            addCriterion("default_value <>", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueGreaterThan(String value) {
+            addCriterion("default_value >", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueGreaterThanOrEqualTo(String value) {
+            addCriterion("default_value >=", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueLessThan(String value) {
+            addCriterion("default_value <", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueLessThanOrEqualTo(String value) {
+            addCriterion("default_value <=", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueLike(String value) {
+            addCriterion("default_value like", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueNotLike(String value) {
+            addCriterion("default_value not like", value, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueIn(List<String> values) {
+            addCriterion("default_value in", values, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueNotIn(List<String> values) {
+            addCriterion("default_value not in", values, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueBetween(String value1, String value2) {
+            addCriterion("default_value between", value1, value2, "defaultValue");
+            return (Criteria) this;
+        }
+
+        public Criteria andDefaultValueNotBetween(String value1, String value2) {
+            addCriterion("default_value not between", value1, value2, "defaultValue");
+            return (Criteria) this;
+        }
     }
 
     public static class Criteria extends GeneratedCriteria {

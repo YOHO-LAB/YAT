@@ -183,7 +183,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     $scope.initParam = function () {
         $scope.parameter = {'id':0,'envId':$scope.global.envId,'name':'','note':'',
             'paramType':1,
-            'kvVal':'',
+            'kvVal':'','isUseDefault':0,'defaultValue':'',
             'dbId':0,'dbSql':'','dbColumn':'','dbGetValType':1,
             'tcId':0,'tcGetValType':1,'tcJsonPath':'','tcJsonMatchNum':1,
             'tcLeft':'','tcRight':'','tcLrMatchNum':1,'tcHeader':'','tcCookie':'',

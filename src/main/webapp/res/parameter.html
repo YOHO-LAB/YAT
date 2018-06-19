@@ -256,6 +256,16 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="form-group" ng-show="parameter.paramType>1">
+                                                <label class="col-lg-2 control-label">默认值</label>
+                                                <div class="col-lg-10">
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios33" value="33-1" ng-checked="parameter.isUseDefault==0"  ng-click="parameter.isUseDefault=0"> 不使用默认值 </label>
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios33" value="33-2" ng-checked="parameter.isUseDefault==1"  ng-click="parameter.isUseDefault=1"> 回填 </label>
+                                                    <label class="checkbox-inline"><input type="radio" name="optionsRadios33" value="33-3" ng-checked="parameter.isUseDefault==2"  ng-click="parameter.isUseDefault=2"> 不回填 </label>
+                                                    <div><small><i class="fa fa-info-circle text-muted"> 使用默认值后，正常取值失败的情况下会使用默认值代替。回填：每次执行成功后，用取到的值回填更新默认值。不回填：每次执行成功后，不更新默认值。</i></small></div>
+                                                    <input class="form-control" ng-model="parameter.defaultValue" ng-show="parameter.isUseDefault>0"/>
+                                                </div>
+                                            </div>
                                         </form>
                                     </div>
                                 </div>

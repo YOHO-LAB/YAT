@@ -49,6 +49,10 @@ public class Parameter {
 
     private String tcHeader;
 
+    private Integer isUseDefault;
+
+    private String defaultValue;
+
     public Integer getId() {
         return id;
     }
@@ -231,5 +235,21 @@ public class Parameter {
 
     public void setTcHeader(String tcHeader) {
         this.tcHeader = tcHeader;
+    }
+
+    public Integer getIsUseDefault() {
+        return isUseDefault;
+    }
+
+    public void setIsUseDefault(Integer isUseDefault) {
+        this.isUseDefault = isUseDefault;
+    }
+
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
     }
 }

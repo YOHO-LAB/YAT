@@ -64,6 +64,8 @@ public class ParameterService {
         String tcLeft = oParameterJson.getString("tcLeft");
         String tcRight = oParameterJson.getString("tcRight");
         int tcLrMatchNum = oParameterJson.getIntValue("tcLrMatchNum");
+        int isUseDefault = oParameterJson.getIntValue("isUseDefault");
+        String defaultValue = oParameterJson.getString("defaultValue");
         Parameter oParameter = new Parameter();
         oParameter.setEnvId(envId);
         oParameter.setName(name);
@@ -83,6 +85,8 @@ public class ParameterService {
         oParameter.setTcLeft(tcLeft);
         oParameter.setTcRight(tcRight);
         oParameter.setTcLrMatchNum(tcLrMatchNum);
+        oParameter.setIsUseDefault(isUseDefault);
+        oParameter.setDefaultValue(defaultValue);
         Date now = new Date();
         oParameter.setAddTime(now);
         oParameter.setAddUserId(userIdInt);
@@ -129,6 +133,8 @@ public class ParameterService {
         String tcLeft = oParameterJson.getString("tcLeft");
         String tcRight = oParameterJson.getString("tcRight");
         int tcLrMatchNum = oParameterJson.getIntValue("tcLrMatchNum");
+        int isUseDefault = oParameterJson.getIntValue("isUseDefault");
+        String defaultValue = oParameterJson.getString("defaultValue");
         oParameter.setEnvId(envId);
         oParameter.setName(name);
         oParameter.setNote(note);
@@ -147,6 +153,8 @@ public class ParameterService {
         oParameter.setTcLeft(tcLeft);
         oParameter.setTcRight(tcRight);
         oParameter.setTcLrMatchNum(tcLrMatchNum);
+        oParameter.setIsUseDefault(isUseDefault);
+        oParameter.setDefaultValue(defaultValue);
         Date now = new Date();
         oParameter.setUpdateTime(now);
         oParameter.setUpdateUserId(userIdInt);
@@ -410,24 +418,40 @@ public class ParameterService {
     public void updateParameter(Parameter parameter) throws Exception{
         parameterMapper.updateByPrimaryKey(parameter);
     }
-    private String getValOfGlobalParam(Map<String,Parameter> globalParamMap,Parameter oParameter) throws Exception{
+
+    private String getValOfGlobalParam(String uuid,Map<String,Parameter> globalParamMap,Parameter oParameter) throws Exception{
         if(oParameter.getParamType() == 1){//KV
             return oParameter.getKvVal();
         }
         if(oParameter.getParamType() == 2){//SQL
+            String res;
+            int isUseDefault = oParameter.getIsUseDefault();
             int dbId = oParameter.getDbId();
             String sql = oParameter.getDbSql();
-            String column = oParameter.getDbColumn();
-            int getValType = oParameter.getDbGetValType();
-            Db db = ds.getDbById(dbId);
-            String ip = db.getIp();
-            int port = db.getPort();
-            String dbName = db.getDbName();
-            String userName = db.getUserName();
-            String password = db.getPassWord();
-            String res = JdbcUtil.query(ip,port,dbName,userName,password,sql,column,getValType);
-            oParameter.setParamType(1);
-            oParameter.setKvVal(res);
+            try{
+                String column = oParameter.getDbColumn();
+                int getValType = oParameter.getDbGetValType();
+                Db db = ds.getDbById(dbId);
+                String ip = db.getIp();
+                int port = db.getPort();
+                String dbName = db.getDbName();
+                String userName = db.getUserName();
+                String password = db.getPassWord();
+                res = JdbcUtil.query(ip,port,dbName,userName,password,sql,column,getValType);
+                if(isUseDefault == 1){
+                    oParameter.setDefaultValue(res);
+                    parameterMapper.updateByPrimaryKey(oParameter);
+                }
+                oParameter.setParamType(1);
+                oParameter.setKvVal(res);
+            }catch (Exception e){
+                if(isUseDefault == 1 || isUseDefault == 2){
+                    res = oParameter.getDefaultValue();
+                    LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，sql(dbId="+dbId+")执行失败，返回默认值："+res+"，sql为"+sql+"，失败原因："+e.getMessage(),"darkorange","","");
+                }else{
+                    throw e;
+                }
+            }
             return res;
         }
         if(oParameter.getParamType() == 3){//TC
@@ -435,9 +459,24 @@ public class ParameterService {
             String tcHeader = oParameter.getTcHeader();
             String tcCookie = oParameter.getTcCookie();
             String tcJsonPath = oParameter.getTcJsonPath();
-            String res = exeParamTc(globalParamMap,oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
-            oParameter.setParamType(1);
-            oParameter.setKvVal(res);
+            String res;
+            int isUseDefault = oParameter.getIsUseDefault();
+            try {
+                res = exeParamTc(globalParamMap,oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
+                if(isUseDefault == 1){
+                    oParameter.setDefaultValue(res);
+                    parameterMapper.updateByPrimaryKey(oParameter);
+                }
+                oParameter.setParamType(1);
+                oParameter.setKvVal(res);
+            }catch (Exception e){
+                if(isUseDefault == 1 || isUseDefault == 2){
+                    res = oParameter.getDefaultValue();
+                    LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，用例(id="+tcId+")执行失败，返回默认值："+res+"，用例失败原因："+e.getMessage(),"darkorange","","");
+                }else{
+                    throw e;
+                }
+            }
             return res;
         }
         throw new Exception("参数类型["+oParameter.getParamType()+"]不存在！");
@@ -455,7 +494,7 @@ public class ParameterService {
             return val;
         }
         if(globalParamMap.containsKey(paramName)){
-            String res = getValOfGlobalParam(globalParamMap,globalParamMap.get(paramName));
+            String res = getValOfGlobalParam(uuid,globalParamMap,globalParamMap.get(paramName));
             return res;
         }
         throw new Exception("参数 "+paramName+" ,取值失败！");

@@ -119,6 +119,10 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
         });
     }
     $scope.modifyHosts = function () {
+        if($scope.loginUser == undefined){
+            alert("未登录，请先登录！");
+            return;
+        }
         $http.post('http://'+window.location.host+'/yat/api/data',{'method':'modifyHosts','userId': $scope.loginUser.id,'hostsData':$scope.hostsData}).success(function (data) {
             if(data.success){
                 $('#hostsModal').modal('hide');

@@ -25,6 +25,8 @@
     <result column="tc_lr_match_num" property="tcLrMatchNum" jdbcType="INTEGER" />
     <result column="tc_cookie" property="tcCookie" jdbcType="VARCHAR" />
     <result column="tc_header" property="tcHeader" jdbcType="VARCHAR" />
+    <result column="is_use_default" property="isUseDefault" jdbcType="INTEGER" />
+    <result column="default_value" property="defaultValue" jdbcType="VARCHAR" />
   </resultMap>
   <sql id="Example_Where_Clause" >
     <where >
@@ -87,7 +89,8 @@
   <sql id="Base_Column_List" >
     id, env_id, name, note, param_type, add_user_id, add_time, update_user_id, update_time, 
     kv_val, db_id, db_sql, db_column, db_get_val_type, tc_id, tc_get_val_type, tc_json_path, 
-    tc_json_match_num, tc_left, tc_right, tc_lr_match_num, tc_cookie, tc_header
+    tc_json_match_num, tc_left, tc_right, tc_lr_match_num, tc_cookie, tc_header, is_use_default, 
+    default_value
   </sql>
   <select id="selectByExample" resultMap="BaseResultMap" parameterType="cn.yat.entity.ParameterExample" >
     select
@@ -127,7 +130,8 @@
       db_column, db_get_val_type, tc_id, 
       tc_get_val_type, tc_json_path, tc_json_match_num, 
       tc_left, tc_right, tc_lr_match_num, 
-      tc_cookie, tc_header)
+      tc_cookie, tc_header, is_use_default, 
+      default_value)
     values (#{id,jdbcType=INTEGER}, #{envId,jdbcType=INTEGER}, #{name,jdbcType=VARCHAR}, 
       #{note,jdbcType=VARCHAR}, #{paramType,jdbcType=INTEGER}, #{addUserId,jdbcType=INTEGER}, 
       #{addTime,jdbcType=TIMESTAMP}, #{updateUserId,jdbcType=INTEGER}, #{updateTime,jdbcType=TIMESTAMP}, 
@@ -135,7 +139,8 @@
       #{dbColumn,jdbcType=VARCHAR}, #{dbGetValType,jdbcType=INTEGER}, #{tcId,jdbcType=INTEGER}, 
       #{tcGetValType,jdbcType=INTEGER}, #{tcJsonPath,jdbcType=VARCHAR}, #{tcJsonMatchNum,jdbcType=INTEGER}, 
       #{tcLeft,jdbcType=VARCHAR}, #{tcRight,jdbcType=VARCHAR}, #{tcLrMatchNum,jdbcType=INTEGER}, 
-      #{tcCookie,jdbcType=VARCHAR}, #{tcHeader,jdbcType=VARCHAR})
+      #{tcCookie,jdbcType=VARCHAR}, #{tcHeader,jdbcType=VARCHAR}, #{isUseDefault,jdbcType=INTEGER}, 
+      #{defaultValue,jdbcType=VARCHAR})
   </insert>
   <insert id="insertSelective" parameterType="cn.yat.entity.Parameter" >
     insert into parameter
@@ -209,6 +214,12 @@
       <if test="tcHeader != null" >
         tc_header,
       </if>
+      <if test="isUseDefault != null" >
+        is_use_default,
+      </if>
+      <if test="defaultValue != null" >
+        default_value,
+      </if>
     </trim>
     <trim prefix="values (" suffix=")" suffixOverrides="," >
       <if test="id != null" >
@@ -279,6 +290,12 @@
       </if>
       <if test="tcHeader != null" >
         #{tcHeader,jdbcType=VARCHAR},
+      </if>
+      <if test="isUseDefault != null" >
+        #{isUseDefault,jdbcType=INTEGER},
+      </if>
+      <if test="defaultValue != null" >
+        #{defaultValue,jdbcType=VARCHAR},
       </if>
     </trim>
   </insert>
@@ -360,6 +377,12 @@
       <if test="record.tcHeader != null" >
         tc_header = #{record.tcHeader,jdbcType=VARCHAR},
       </if>
+      <if test="record.isUseDefault != null" >
+        is_use_default = #{record.isUseDefault,jdbcType=INTEGER},
+      </if>
+      <if test="record.defaultValue != null" >
+        default_value = #{record.defaultValue,jdbcType=VARCHAR},
+      </if>
     </set>
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
@@ -389,7 +412,9 @@
       tc_right = #{record.tcRight,jdbcType=VARCHAR},
       tc_lr_match_num = #{record.tcLrMatchNum,jdbcType=INTEGER},
       tc_cookie = #{record.tcCookie,jdbcType=VARCHAR},
-      tc_header = #{record.tcHeader,jdbcType=VARCHAR}
+      tc_header = #{record.tcHeader,jdbcType=VARCHAR},
+      is_use_default = #{record.isUseDefault,jdbcType=INTEGER},
+      default_value = #{record.defaultValue,jdbcType=VARCHAR}
     <if test="_parameter != null" >
       <include refid="Update_By_Example_Where_Clause" />
     </if>
@@ -463,6 +488,12 @@
       <if test="tcHeader != null" >
         tc_header = #{tcHeader,jdbcType=VARCHAR},
       </if>
+      <if test="isUseDefault != null" >
+        is_use_default = #{isUseDefault,jdbcType=INTEGER},
+      </if>
+      <if test="defaultValue != null" >
+        default_value = #{defaultValue,jdbcType=VARCHAR},
+      </if>
     </set>
     where id = #{id,jdbcType=INTEGER}
   </update>
@@ -489,7 +520,9 @@
       tc_right = #{tcRight,jdbcType=VARCHAR},
       tc_lr_match_num = #{tcLrMatchNum,jdbcType=INTEGER},
       tc_cookie = #{tcCookie,jdbcType=VARCHAR},
-      tc_header = #{tcHeader,jdbcType=VARCHAR}
+      tc_header = #{tcHeader,jdbcType=VARCHAR},
+      is_use_default = #{isUseDefault,jdbcType=INTEGER},
+      default_value = #{defaultValue,jdbcType=VARCHAR}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>

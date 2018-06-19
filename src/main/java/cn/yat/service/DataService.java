@@ -2,13 +2,16 @@ package cn.yat.service;
 
 import cn.yat.entity.*;
 import cn.yat.util.CmdUtil;
+import cn.yat.util.FileRWUtil;
 import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONObject;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * Created by rong.gao on 2018/3/6.
@@ -289,7 +292,10 @@ public class DataService {
             res.put("success", false);
             res.put("data", "Windows 系统，无法获取Hosts");
         }else{
-            CmdUtil.doCmd("echo \""+hostsData+"\" > /etc/hosts");
+            hostsData = hostsData.replaceAll("\n","\\\n");
+            String[] hostsDataArr = hostsData.split("\n");
+            List<String> list = Lists.newArrayList(hostsDataArr);
+            FileRWUtil.writeFileList("/etc/hosts",list,false);
             res.put("success", true);
             res.put("data", "modify success");
         }
