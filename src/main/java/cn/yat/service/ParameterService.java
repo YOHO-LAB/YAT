@@ -447,15 +447,12 @@ public class ParameterService {
                     res = oParameter.getDefaultValue();
                     LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，sql(dbId="+dbId+")执行失败，返回默认值："+res+"，sql为"+sql+"，失败原因："+e.getMessage(),"darkorange","","");
                 }else{
+                    LogUtil.addLog(uuid,"参数替换","参数名："+oParameter.getName()+"，sql(dbId="+dbId+")执行失败","red","","");
                     throw e;
                 }
             }
-            if(res != null){
-                oParameter.setParamType(1);
-                oParameter.setKvVal(res);
-            }else{
-                throw new Exception("参数 "+oParameter.getName()+" ,取值为null！");
-            }
+            oParameter.setParamType(1);
+            oParameter.setKvVal(res);
             return res;
         }
         if(oParameter.getParamType() == 3){//TC
@@ -476,15 +473,12 @@ public class ParameterService {
                     res = oParameter.getDefaultValue();
                     LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，用例(id="+tcId+")执行失败，返回默认值："+res+"，用例失败原因："+e.getMessage(),"darkorange","","");
                 }else{
+                    LogUtil.addLog(uuid,"参数替换","参数名："+oParameter.getName()+"，用例(id="+tcId+")执行失败","red","","");
                     throw e;
                 }
             }
-            if(res != null){
-                oParameter.setParamType(1);
-                oParameter.setKvVal(res);
-            }else{
-                throw new Exception("参数 "+oParameter.getName()+" ,取值为null！");
-            }
+            oParameter.setParamType(1);
+            oParameter.setKvVal(res);
             return res;
         }
         throw new Exception("参数类型["+oParameter.getParamType()+"]不存在！");
