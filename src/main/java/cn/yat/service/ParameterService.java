@@ -442,8 +442,6 @@ public class ParameterService {
                     oParameter.setDefaultValue(res);
                     parameterMapper.updateByPrimaryKey(oParameter);
                 }
-                oParameter.setParamType(1);
-                oParameter.setKvVal(res);
             }catch (Exception e){
                 if(isUseDefault == 1 || isUseDefault == 2){
                     res = oParameter.getDefaultValue();
@@ -451,6 +449,12 @@ public class ParameterService {
                 }else{
                     throw e;
                 }
+            }
+            if(res != null){
+                oParameter.setParamType(1);
+                oParameter.setKvVal(res);
+            }else{
+                throw new Exception("参数 "+oParameter.getName()+" ,取值为null！");
             }
             return res;
         }
@@ -467,8 +471,6 @@ public class ParameterService {
                     oParameter.setDefaultValue(res);
                     parameterMapper.updateByPrimaryKey(oParameter);
                 }
-                oParameter.setParamType(1);
-                oParameter.setKvVal(res);
             }catch (Exception e){
                 if(isUseDefault == 1 || isUseDefault == 2){
                     res = oParameter.getDefaultValue();
@@ -476,6 +478,12 @@ public class ParameterService {
                 }else{
                     throw e;
                 }
+            }
+            if(res != null){
+                oParameter.setParamType(1);
+                oParameter.setKvVal(res);
+            }else{
+                throw new Exception("参数 "+oParameter.getName()+" ,取值为null！");
             }
             return res;
         }
