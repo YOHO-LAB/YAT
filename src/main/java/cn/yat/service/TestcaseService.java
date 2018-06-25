@@ -117,6 +117,10 @@ public class TestcaseService {
                 String toEnvId = request.getParameter("toEnvId");
                 copyByEnvId(res,fromEnvId,toEnvId);
             }
+            if(method.equals("sendEmail4CI")){
+                String runId = request.getParameter("runId");
+                sendEmail4CI(res,runId);
+            }
         }catch(Exception e){
             e.printStackTrace();
             res.put("success", false);
@@ -1235,6 +1239,14 @@ public class TestcaseService {
                 throw new Exception("insert fail 1");
             }
         }
+    }
+    public void sendEmail4CI(JSONObject res , String runId) throws Exception{
+        int runIdInt = Integer.parseInt(runId);
+        LogEntity logEntity = getLogEntity(runIdInt);
+        String msg = buildEmailMsg(runIdInt,logEntity);
+        jmu.sendCiMail(msg,"每日CI",null);
+        res.put("success",true);
+        res.put("data","send email for runId "+runId+" success.");
     }
     private String buildEmailMsg(int runId,LogEntity logEntity) throws Exception{
         String msg ;
