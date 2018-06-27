@@ -842,7 +842,7 @@ public class TestcaseService {
         RunSummaryExample.Criteria criteria = example.createCriteria();
         criteria.andUserIdEqualTo(0);
         criteria.andEndTimeIsNotNull();
-        example.setOrderByClause("start_time asc limit 30");
+        example.setOrderByClause("start_time desc limit 30");
         List<RunSummary> list = runSummaryMapper.selectByExample(example);
         JSONArray arr =new JSONArray();
         Date now = new Date();
