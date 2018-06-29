@@ -4,7 +4,10 @@
  - `MySQL` 详细步骤参照test/shell/installMysql57.sh
  - `Tomcat` 下载并安装maven git，配置git config，下载Tomcat并解压，执行test/shell/deploy.sh 自动发布
  - `首页地址` http://YOUR_SERVER:PORT/yat/pages/index.html
-
+ 
+## WIKI 
+   https://github.com/YOHO-LAB/YAT/wiki
+ 
 ## 工程结构及说明
 `src/main`
  - `java/cn/yat`
