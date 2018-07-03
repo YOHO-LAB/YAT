@@ -2,7 +2,6 @@ package cn.yat.service;
 
 import cn.yat.util.CmdUtil;
 import cn.yat.util.FileRWUtil;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,10 +31,6 @@ public class DataService {
     private OperationService os;
     @Autowired
     private DbService ds;
-    @Autowired
-    private UserService us;
-    @Autowired
-    private RecordUtil ru;
 
     public JSONObject post(HttpServletRequest request) {
         JSONObject res = new JSONObject();

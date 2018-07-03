@@ -15,7 +15,6 @@
       <table schema="yat" tableName="feedback" ></table>
       <table schema="yat" tableName="testcase" ></table>
       <table schema="yat" tableName="service" ></table>
-      <table schema="yat" tableName="record" ></table>
       <table schema="yat" tableName="environment" ></table>
       <table schema="yat" tableName="parameter" ></table>
       <table schema="yat" tableName="db" ></table>

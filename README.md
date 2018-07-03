@@ -50,7 +50,6 @@
       - - `MD5` MD5加解密工具类
       - - `MD5Util` MD5加解密工具类
       - - `ParamUtil` 参数化工具类
-      - - `RecordUtil` 操作记录工具类
       - - `SignatureVerifyUtil` 验签工具类
  - `resources`
    - - `config`

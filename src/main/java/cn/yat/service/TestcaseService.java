@@ -1,12 +1,13 @@
 package cn.yat.service;
 
 import cn.yat.entity.*;
-import cn.yat.mapper.*;
+import cn.yat.mapper.DataSourceLoopMapper;
+import cn.yat.mapper.RunSummaryMapper;
+import cn.yat.mapper.TestcaseMapper;
 import cn.yat.myentity.LogDataSourceEntity;
 import cn.yat.myentity.LogEntity;
 import cn.yat.myentity.RunHttpResultEntity;
 import cn.yat.util.*;
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -27,7 +28,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
@@ -60,8 +60,6 @@ public class TestcaseService {
     private UserService us;
     @Autowired
     private OperationService os;
-    @Autowired
-    private RecordUtil ru;
     @Autowired
     private ParamUtil pu;
     @Autowired
@@ -319,7 +317,6 @@ public class TestcaseService {
                 res.put("success", false);
                 res.put("data", "insert DataSourceLoop failed");
             }
-            ru.addRecord(userIdInt,"addTestcase",caseId+"");
         }else{
             res.put("success", false);
             res.put("data", "insert Testcase failed");
@@ -404,7 +401,6 @@ public class TestcaseService {
                 res.put("success", false);
                 res.put("data", "modify DataSourceLoop failed");
             }
-            ru.addRecord(userIdInt,"modifyTestcase",id+"");
         }else{
             res.put("success", false);
             res.put("data", "modify Testcase failed");
@@ -417,7 +413,6 @@ public class TestcaseService {
         oTestcase.setStatus(0);
         int upd = testcaseMapper.updateByPrimaryKeySelective(oTestcase);
         if(upd == 1){
-            ru.addRecord(userIdInt,"deleteTestcase",id);
             res.put("success", true);
             res.put("data", "delete success");
         }else{
@@ -1176,7 +1171,6 @@ public class TestcaseService {
                 }
             }
         });
-        ru.addRecord(userIdInt,"runDailyCiManually","");
         res.put("success", true);
         res.put("data", "已触发CI，运行结果名称："+subject+"By"+userNameCn);
     }

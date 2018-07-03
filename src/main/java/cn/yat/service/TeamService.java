@@ -3,7 +3,6 @@ package cn.yat.service;
 import cn.yat.entity.Team;
 import cn.yat.entity.TeamExample;
 import cn.yat.mapper.TeamMapper;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -25,8 +24,6 @@ public class TeamService {
     private TeamMapper teamMapper;
     @Autowired
     private UserService us;
-    @Autowired
-    private RecordUtil ru;
 
     public void addTeam(JSONObject res , String userId , String teamName , String teamNote) throws Exception{
         int userIdInt = Integer.parseInt(userId);
@@ -44,7 +41,6 @@ public class TeamService {
             TeamExample.Criteria criteria = example.createCriteria();
             criteria.andNameEqualTo(teamName);
             List<Team> teamList = teamMapper.selectByExample(example);
-            ru.addRecord(userIdInt,"addTeam",teamList.get(0).getId()+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -154,7 +150,6 @@ public class TeamService {
         oTeam.setUpdateTime(new Date());
         int ist = teamMapper.updateByPrimaryKeySelective(oTeam);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyTeam",teamId);
             res.put("success", true);
             res.put("data", oTeam);
         }else{
@@ -167,7 +162,6 @@ public class TeamService {
         int teamIdInt = Integer.parseInt(teamId);
         int del = teamMapper.deleteByPrimaryKey(teamIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteTeam",teamId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

@@ -3,7 +3,6 @@ package cn.yat.service;
 import cn.yat.entity.Db;
 import cn.yat.entity.DbExample;
 import cn.yat.mapper.DbMapper;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -25,8 +24,6 @@ public class DbService {
     private DbMapper dbMapper;
     @Autowired
     private UserService us;
-    @Autowired
-    private RecordUtil ru;
 
     public void addDb(JSONObject res , String userId , String teamName , String teamNote, String db_ip,String db_port,String db_dbName,String db_user,String db_password,String envId) throws Exception{
         int userIdInt = Integer.parseInt(userId);
@@ -53,7 +50,6 @@ public class DbService {
             criteria.andNameEqualTo(teamName);
             criteria.andEnvIdEqualTo(envIdInt);
             List<Db> teamList = dbMapper.selectByExample(example);
-            ru.addRecord(userIdInt,"addDb",teamList.get(0).getId()+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -184,7 +180,6 @@ public class DbService {
         oTeam.setUpdateTime(new Date());
         int ist = dbMapper.updateByPrimaryKeySelective(oTeam);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyDb",teamId);
             res.put("success", true);
             res.put("data", oTeam);
         }else{
@@ -197,7 +192,6 @@ public class DbService {
         int teamIdInt = Integer.parseInt(teamId);
         int del = dbMapper.deleteByPrimaryKey(teamIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteDb",teamId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

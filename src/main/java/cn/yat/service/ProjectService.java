@@ -5,7 +5,6 @@ import cn.yat.entity.Project;
 import cn.yat.entity.ProjectExample;
 import cn.yat.entity.Testcase;
 import cn.yat.mapper.ProjectMapper;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -31,8 +30,6 @@ public class ProjectService {
     private TestcaseService ts;
     @Autowired
     private EnvironmentService es;
-    @Autowired
-    private RecordUtil ru;
 
     public void addProject(JSONObject res , String userId , String teamName , String teamNote) throws Exception{
         int userIdInt = Integer.parseInt(userId);
@@ -52,7 +49,6 @@ public class ProjectService {
             List<Project> projectList = projectMapper.selectByExample(example);
             int prjId = projectList.get(0).getId();
             es.addEnvironment(new JSONObject(),userId,"空，请修改！","",prjId+"");
-            ru.addRecord(userIdInt,"addTeam",prjId+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -162,7 +158,6 @@ public class ProjectService {
         oProject.setUpdateTime(new Date());
         int ist = projectMapper.updateByPrimaryKeySelective(oProject);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyProject",teamId);
             res.put("success", true);
             res.put("data", oProject);
         }else{
@@ -175,7 +170,6 @@ public class ProjectService {
         int teamIdInt = Integer.parseInt(teamId);
         int del = projectMapper.deleteByPrimaryKey(teamIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteProject",teamId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

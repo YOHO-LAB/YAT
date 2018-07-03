@@ -1,9 +1,15 @@
 package cn.yat.service;
 
-import cn.yat.entity.*;
+import cn.yat.entity.Db;
+import cn.yat.entity.Parameter;
+import cn.yat.entity.ParameterExample;
+import cn.yat.entity.Testcase;
 import cn.yat.mapper.ParameterMapper;
 import cn.yat.myentity.RunHttpResultEntity;
-import cn.yat.util.*;
+import cn.yat.util.CheckPointUtil;
+import cn.yat.util.JdbcUtil;
+import cn.yat.util.LogUtil;
+import cn.yat.util.ParamUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -31,13 +37,7 @@ public class ParameterService {
     @Autowired
     private TestcaseService ts;
     @Autowired
-    private ServiceService ss;
-    @Autowired
-    private UserService us;
-    @Autowired
     private DbService ds;
-    @Autowired
-    private RecordUtil ru;
     @Autowired
     private ParamUtil pu;
     @Autowired
@@ -99,7 +99,6 @@ public class ParameterService {
             criteria.andEnvIdEqualTo(envId);
             criteria.andNameEqualTo(name);
             List<Parameter> paramList = parameterMapper.selectByExample(example);
-            ru.addRecord(userIdInt,"addParam",paramList.get(0).getId()+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -160,7 +159,6 @@ public class ParameterService {
         oParameter.setUpdateUserId(userIdInt);
         int ist = parameterMapper.updateByPrimaryKeySelective(oParameter);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyParam",id+"");
             res.put("success", true);
             res.put("data", "modify success");
         }else{
@@ -350,7 +348,6 @@ public class ParameterService {
         int paramIdInt = Integer.parseInt(paramId);
         int del = parameterMapper.deleteByPrimaryKey(paramIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteParam",paramId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

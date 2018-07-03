@@ -4,7 +4,6 @@ import cn.yat.entity.Environment;
 import cn.yat.entity.EnvironmentExample;
 import cn.yat.entity.Testcase;
 import cn.yat.mapper.EnvironmentMapper;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -30,8 +29,6 @@ public class EnvironmentService {
     private ProjectService ps;
     @Autowired
     private UserService us;
-    @Autowired
-    private RecordUtil ru;
 
     public void addEnvironment(JSONObject res , String userId , String teamName , String teamNote,String prjId) throws Exception{
         int userIdInt = Integer.parseInt(userId);
@@ -52,7 +49,6 @@ public class EnvironmentService {
             criteria.andNameEqualTo(teamName);
             criteria.andProjectIdEqualTo(prjIdInt);
             List<Environment> teamList = environmentMapper.selectByExample(example);
-            ru.addRecord(userIdInt,"addEnvironment",teamList.get(0).getId()+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -161,7 +157,6 @@ public class EnvironmentService {
         oEnvironment.setUpdateTime(new Date());
         int ist = environmentMapper.updateByPrimaryKeySelective(oEnvironment);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyEnvironment",envId);
             res.put("success", true);
             res.put("data", oEnvironment);
         }else{
@@ -174,7 +169,6 @@ public class EnvironmentService {
         int teamIdInt = Integer.parseInt(teamId);
         int del = environmentMapper.deleteByPrimaryKey(teamIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteEnvironment",teamId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

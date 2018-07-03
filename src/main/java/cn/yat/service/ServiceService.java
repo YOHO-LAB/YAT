@@ -4,7 +4,6 @@ package cn.yat.service;
 import cn.yat.entity.ServiceExample;
 import cn.yat.entity.Testcase;
 import cn.yat.mapper.ServiceMapper;
-import cn.yat.util.RecordUtil;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -28,8 +27,6 @@ public class ServiceService {
     private TestcaseService ts;
     @Autowired
     private UserService us;
-    @Autowired
-    private RecordUtil ru;
 
     public void addService(JSONObject res , String userId , String serviceName , String serviceNote,String prjId) throws Exception{
         int userIdInt = Integer.parseInt(userId);
@@ -50,7 +47,6 @@ public class ServiceService {
             criteria.andNameEqualTo(serviceName);
             criteria.andProjectIdEqualTo(prjIdInt);
             List<cn.yat.entity.Service> teamList = serviceMapper.selectByExample(example);
-            ru.addRecord(userIdInt,"addService",teamList.get(0).getId()+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -159,7 +155,6 @@ public class ServiceService {
         oService.setUpdateTime(new Date());
         int ist = serviceMapper.updateByPrimaryKeySelective(oService);
         if(ist == 1){
-            ru.addRecord(userIdInt,"modifyService",serviceId);
             res.put("success", true);
             res.put("data", oService);
         }else{
@@ -172,7 +167,6 @@ public class ServiceService {
         int teamIdInt = Integer.parseInt(teamId);
         int del = serviceMapper.deleteByPrimaryKey(teamIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteService",teamId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

@@ -37,8 +37,6 @@ public class OperationService{
     @Autowired
     private ParameterService ps;
     @Autowired
-    private RecordUtil ru;
-    @Autowired
     private CheckPointUtil cpu;
     @Autowired
     private ParamUtil pu;
@@ -101,7 +99,6 @@ public class OperationService{
                     throw new Exception("Add BshJavaCode Failed!");
                 }
             }
-            ru.addRecord(userIdInt,"addOps",opsId+"");
             res.put("success", true);
             res.put("data", "insert success");
         }else{
@@ -161,7 +158,6 @@ public class OperationService{
                     throw new Exception("Modify BshJavaCode Failed!");
                 }
             }
-            ru.addRecord(userIdInt,"modifyOps",id+"");
             res.put("success", true);
             res.put("data", "modify success");
         }else{
@@ -216,7 +212,6 @@ public class OperationService{
         int opsIdInt = Integer.parseInt(opsId);
         int del = operationMapper.deleteByPrimaryKey(opsIdInt);
         if(del == 1){
-            ru.addRecord(userIdInt,"deleteOps",opsId);
             res.put("success", true);
             res.put("data", "delete success");
         }else{

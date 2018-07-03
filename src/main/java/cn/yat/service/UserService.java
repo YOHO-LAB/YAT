@@ -1,12 +1,11 @@
 package cn.yat.service;
 
-import cn.yat.ldap.LdapAuthService;
-import cn.yat.ldap.LdapUser;
-import cn.yat.mapper.FeedbackMapper;
-import cn.yat.mapper.ProjectMapper;
 import cn.yat.entity.Feedback;
 import cn.yat.entity.User;
 import cn.yat.entity.UserExample;
+import cn.yat.ldap.LdapAuthService;
+import cn.yat.ldap.LdapUser;
+import cn.yat.mapper.FeedbackMapper;
 import cn.yat.mapper.UserMapper;
 import com.alibaba.fastjson.JSONObject;
 import com.google.common.collect.Lists;
@@ -25,8 +24,6 @@ public class UserService {
     private UserMapper userMapper;
     @Autowired
     private FeedbackMapper feedbackMapper;
-    @Autowired
-    private ProjectMapper projectMapper;
     @Autowired
     private LdapAuthService ldap;
 
