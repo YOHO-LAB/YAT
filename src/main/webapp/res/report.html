@@ -33,6 +33,7 @@
                     <div class="col-lg-12">
                         <h2>{{reportSummary.name}}
                             <ul class="tag-list pull-right" style="padding: 0">
+                                <li class=""><a href="" ng-click="changeSortByEnv()" ng-style="{'background-color':sortByEnv?'aliceblue':''}"> <i class="fa" ng-class="{true:'fa-toggle-on text-navy',false:'fa-toggle-off'}[sortByEnv]"> 按环境过滤</i></a></li>
                                 <li class="text-navy"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.passRate" ng-click="clickTag('passRate')"> <strong>成功率 {{reportPassRate}}%</strong></a></li>
                                 <li class="text-success"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.pass" ng-click="clickTag('pass')"> <strong>成功 {{reportPass}}</strong></a></li>
                                 <li class="text-warning"><a href="" style="background-color: aliceblue;" ng-style="tagStyle.skip" ng-click="clickTag('skip')"> <strong>跳过 {{reportSkip}}</strong></a></li>
@@ -54,7 +55,7 @@
                         <div class="scroll_content">
                             <input class="form-control" type="text" placeholder="filter" ng-model="filterName"/>
                             <ul class="list-group elements-list">
-                                <li class="list-group-item" style="cursor: pointer" ng-repeat="li in reportLog | caseNameFilter : filterName : sTag" ng-click="clickLi(li)" ng-class="{'active':sLi.l==li.l}">
+                                <li class="list-group-item" style="cursor: pointer" ng-repeat="li in reportLog | caseNameFilter : filterName : sTag : sortByEnv : global.envId" ng-click="clickLi(li)" ng-class="{'active':sLi.l==li.l}">
                                     <small class="pull-right text-muted"> {{li.h}}ms</small>
                                     <strong ng-class="{'text-navy':li.p==1,'text-warning':li.s==1,'text-danger':li.f==1}">{{li.caseName}}</strong>
                                 </li>

@@ -7,6 +7,7 @@ public class LogDataSourceEntity {
     long t;// time total
     long h;// time http
     String l;// log name
+    int e; // env id
 
     public int getP() {
         return p;
@@ -54,5 +55,13 @@ public class LogDataSourceEntity {
 
     public void setL(String l) {
         this.l = l;
+    }
+
+    public int getE() {
+        return e;
+    }
+
+    public void setE(int e) {
+        this.e = e;
     }
 }

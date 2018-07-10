@@ -1,11 +1,16 @@
 myAppModule.filter("caseNameFilter" , function(){
-    return function(trs , search_key ,stag){
+    return function(trs , search_key ,stag , sortByEnv ,envId){
         if(search_key==undefined || search_key==null || search_key==""){
             search_key = ".";
         }
         if(trs != undefined && trs.length > 0){
             var newtr = [];
             for(var i=0 ; i<trs.length ; i++){
+                if(sortByEnv){
+                    if(trs[i].e != envId){
+                        continue;
+                    }
+                }
                 if(stag=='pass'){
                     if(trs[i].p!=1){
                         continue;
@@ -88,11 +93,40 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             "total":{'border-color':''}
         };
     }
+    $scope.changeSortByEnv = function () {
+        if($scope.sortByEnv){
+            var search = window.location.search.substring(1);
+            var newSearch = '';
+            if($scope.NN(search) && search.length > 0){
+                var sArr = search.split('&');
+                for(var i=0;i<sArr.length;i++){
+                    if(sArr[i].startsWith('sortByEnvId')){
+                        continue;
+                    }
+                    newSearch += sArr[i] + '&';
+                }
+            }
+            if(newSearch.endsWith('&')){
+                newSearch = newSearch.substring(0,newSearch.length-1);
+            }
+            location.href = location.origin + location.pathname + '?' + newSearch;
+        }else{
+            location.href = location.href + "&sortByEnvId=";
+        }
+    }
 
     var reportId = $scope.getUrlParamValue("reportId");
+    var sortByEnvId = $scope.getUrlParamValue("sortByEnvId");
     if($scope.NN(reportId)){
         $scope.getReportById(reportId);
         $scope.clickTag('passRate');
+        if(sortByEnvId == undefined){
+            $scope.sortByEnv = false;
+        }else{
+            $scope.sortByEnv = true;
+            $scope.global = $scope.getGlobalEnvId();
+        }
+
     }
 
 });

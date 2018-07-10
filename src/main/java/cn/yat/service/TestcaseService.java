@@ -1496,6 +1496,7 @@ public class TestcaseService {
         int caseIdInt = oTestcase.getId();
         LogDataSourceEntity oLogDataSourceEntity = new LogDataSourceEntity();
         oLogDataSourceEntity.setL(uuid);
+        oLogDataSourceEntity.setE(oTestcase.getTestEnvId());
         Map<Integer , List<LogDataSourceEntity>> em = logEntity.getMap();
         List<LogDataSourceEntity> ldsList;
         if(em.containsKey(caseIdInt)){
