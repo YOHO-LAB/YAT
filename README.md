@@ -1,11 +1,11 @@
 # YAT自动化测试平台
 
 ## 如何部署
- - `MySQL` 详细步骤参照test/shell/installMysql57.sh
- - `Tomcat` 下载并安装maven git，配置git config，下载Tomcat并解压，执行test/shell/deploy.sh 自动发布
+ - `数据库` MySQL5.7(安装步骤参照src/test/shell/installMysql57.sh),创建数据库yat,导入表结构(src/test/shell/yat.sql)
+ - `应用` Tomcat 直接war包部署或者使用(src/test/shell/deploy.sh)一键自动部署
  - `首页地址` http://YOUR_SERVER:PORT/yat/pages/index.html
  
-## WIKI 
+## Wiki 
    https://github.com/YOHO-LAB/YAT/wiki
  
 ## 工程结构及说明
