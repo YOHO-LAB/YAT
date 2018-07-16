@@ -68,6 +68,10 @@ public class ParamUtil {
                 }
                 String k = str.substring(0,idx).trim();
                 String v = str.substring(idx+1).trim();
+                // 解决url中带 + 号的问题
+                if(v.contains("+")){
+                    v = v.replaceAll("\\+","%2b");
+                }
                 v = URLDecoder.decode(v,"UTF-8").trim();
                 reqParams.put(k,v);
             }
