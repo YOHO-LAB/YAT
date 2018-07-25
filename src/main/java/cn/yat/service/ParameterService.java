@@ -304,9 +304,7 @@ public class ParameterService {
                 if(isDeleteBool){
                     ist = parameterMapper.deleteByPrimaryKey(p.getId());
                 }else{
-                    p.setId(0);
-                    p.setEnvId(destinationEnvIdInt);
-                    ist = parameterMapper.insertSelective(p);
+                    ist = copyParam(p,destinationEnvIdInt);
                 }
                 if(ist != 1){
                     failParamName += p.getName() + ",";
@@ -331,9 +329,7 @@ public class ParameterService {
         }else{
             int paramIdInt = Integer.parseInt(paramId);
             Parameter parameter = parameterMapper.selectByPrimaryKey(paramIdInt);
-            parameter.setId(0);
-            parameter.setEnvId(destinationEnvIdInt);
-            int ist = parameterMapper.insertSelective(parameter);
+            int ist = copyParam(parameter,destinationEnvIdInt);
             if(ist == 1){
                 res.put("success", true);
                 res.put("data", "参数复制成功！");
@@ -341,6 +337,38 @@ public class ParameterService {
                 res.put("success", false);
                 res.put("data", "参数复制失败！");
             }
+        }
+    }
+    private int copyParam(Parameter p, int destinationEnvIdInt) throws Exception{
+        Parameter pTmp = getParamByEnvIdAndName(destinationEnvIdInt,p.getName());
+        if(pTmp != null){
+            return 1;
+        }
+        p.setEnvId(destinationEnvIdInt);
+        if(p.getParamType() == 2){// sql类型
+            int dbId2 = ds.copyDb(p.getDbId(),destinationEnvIdInt);
+            p.setDbId(dbId2);
+        }
+        if(p.getParamType() == 3){// 测试用例类型
+            int tcId2 = ts.copySingleTestcase(p.getTcId(),destinationEnvIdInt);
+            p.setTcId(tcId2);
+        }
+        Date now = new Date();
+        p.setAddTime(now);
+        p.setUpdateTime(now);
+        p.setId(0);
+        return parameterMapper.insert(p);
+    }
+    private Parameter getParamByEnvIdAndName(int envId,String name) throws Exception{
+        ParameterExample example = new ParameterExample();
+        ParameterExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envId);
+        criteria.andNameEqualTo(name);
+        List<Parameter> pList = parameterMapper.selectByExample(example);
+        if(pList.size() == 1){
+            return pList.get(0);
+        }else{
+            return null;
         }
     }
     public void deleteParam(JSONObject res , String userId, String paramId) throws Exception{

@@ -129,7 +129,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     $scope.page = 1;
     $scope.totalPage = 0;
     $scope.totalCount = 0;
-    $scope.s_create_time = "2018/01/01 - 2018/12/31";
-    $scope.s_update_time = "2018/01/01 - 2018/12/31";
+    $scope.s_create_time = "2018/01/01 - 2088/12/31";
+    $scope.s_update_time = "2018/01/01 - 2088/12/31";
     $scope.getTeam();
 });

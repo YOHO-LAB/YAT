@@ -27,6 +27,29 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             });
         }
     });
+    $('#pageLimit2').bootstrapPaginator({
+        "currentPage": 1,
+        "totalPages": 1,
+        "size":"normal",
+        "bootstrapMajorVersion": 3,
+        "alignment":"right",
+        "numberOfPages":8,
+        "itemTexts": function (type, page, current) {
+            switch (type) {
+                case "first": return "首页";
+                case "prev": return "上一页";
+                case "next": return "下一页";
+                case "last": return "末页";
+                case "page": return page;
+            }
+        },
+        "onPageClicked": function (event, originalEvent, type, page){
+            $scope.$apply(function () {
+                $scope.page2 = page;
+                $scope.diff();
+            });
+        }
+    });
     $('input[name="daterange"]').daterangepicker({
         format: 'YYYY/MM/DD',
         startDate: '2018-01-01',
@@ -61,14 +84,12 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             }
         });
     }
-    $scope.getAllEnvironment = function () {
+    $scope.getDestinationEnvironment = function () {
         $http.post('http://'+window.location.host+'/yat/api/data',
-            {'method':'getAllEnvironment'}
+            {'method':'getDestinationEnvironment','prjId':$scope.global.prjId,'envId':$scope.global.envId}
         ).success(function (data) {
             if(data.success){
                 $scope.environmentList = data.data;
-                $scope.environmentList.unshift({"id":-1,"name":"不限"});
-                // $scope.triggerSelect2("select2_environment",$scope.tc.testEnvId);
             }else{
                 alert("[Error]:"+data.data);
             }
@@ -93,7 +114,7 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
                 $scope.allSearchCaseIds = data.allSearchCaseIds;
                 $('#pageLimit').bootstrapPaginator("setOptions",{'currentPage':$scope.page,'totalPages':data.totalPage});
             }else{
-                $scope.errorInfo = "[Error]:"+data.data;
+                alert("Error:"+data.data);
             }
             // $('#spinnersModal').modal('hide');
         });
@@ -125,11 +146,77 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
             });
         }
     }
+    $scope.copyTestcase = function () {
+        $scope.getDestinationEnvironment();
+        $scope.isCopyTc = true;
+        $scope.caseList2 = [];
+        $scope.page2 = 1;
+    }
+    $scope.diff = function () {
+        if($scope.destEnvId == undefined || $scope.destEnvId == 0){
+            alert("请先选择要对比的目标环境！");
+            return;
+        }
+        $('#spinnersModal').modal('show');
+        $http.post('http://'+window.location.host+'/yat/api/tc',
+            {'method':'diffTestcaseByEnvId','fromEnvId':$scope.global.envId,'destEnvId':$scope.destEnvId,'page':$scope.page2,'count':10}
+        ).success(function (data) {
+            if(data.success){
+                $scope.caseList2 = data.data;
+                $scope.totalPage2 = data.totalPage;
+                $scope.totalCount2 = data.totalCount;
+                $scope.allDiffCaseIds = data.allDiffCaseIds;
+                $('#pageLimit2').bootstrapPaginator("setOptions",{'currentPage':$scope.page2,'totalPages':data.totalPage2});
+            }else{
+                alert(data.data);
+            }
+            $('#spinnersModal').modal('hide');
+        });
+    }
+    $scope.copyAll = function () {
+        if($scope.caseList2.length > 0){
+            if(confirm("确认要复制所有目标环境中缺少的用例？")){
+                $('#spinnersModal').modal('show');
+                $http.post('http://'+window.location.host+'/yat/api/tc',
+                    {'method':'copyAllTestcase','allDiffCaseIds':$scope.allDiffCaseIds,'destEnvId':$scope.destEnvId}
+                ).success(function (data) {
+                    if(data.success){
+                        $scope.diff();
+                    }else{
+                        alert(data.data);
+                    }
+                    $('#spinnersModal').modal('hide');
+                });
+            }
+        }
+    }
+    $scope.copySingle = function (caseId) {
+        if(caseId != undefined){
+            if(confirm("确认要复制用例（id="+caseId+"）？")){
+                $('#spinnersModal').modal('show');
+                $http.post('http://'+window.location.host+'/yat/api/tc',
+                    {'method':'copySingleTestcase','caseId':caseId,'destEnvId':$scope.destEnvId}
+                ).success(function (data) {
+                    if(data.success){
+                        $scope.diff();
+                    }else{
+                        alert(data.data);
+                    }
+                    $('#spinnersModal').modal('hide');
+                });
+            }
+        }
+    }
+    $(".select2_env_diff_destination").select2();
+    $('.select2_env_diff_destination').on('select2:select', function (e) {
+        $scope.$apply(function () {
+            $scope.destEnvId = e.params.data.id;
+        });
+    });
 
     $(".select2_demo_1").select2();
     $('.select2_demo_1').on('select2:select', function (e) {
         var data = e.params.data;
-        console.log(data);
     });
 
     $scope.global = $scope.getGlobalEnvId();
@@ -138,10 +225,9 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     $scope.page = 1;
     $scope.totalPage = 0;
     $scope.totalCount = 0;
-    $scope.s_create_time = "2018/01/01 - 2018/12/31";
-    $scope.s_update_time = "2018/01/01 - 2018/12/31";
+    $scope.s_create_time = "2018/01/01 - 2088/12/31";
+    $scope.s_update_time = "2018/01/01 - 2088/12/31";
     $scope.getCase();
     $scope.getAllTeam();
     $scope.getAllServiceByPrjId();
-    // $scope.getAllEnvironment();
 });

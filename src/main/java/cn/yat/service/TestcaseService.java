@@ -234,6 +234,23 @@ public class TestcaseService {
             if(method.equals("getSummaryOfCase")){
                 getSummaryOfCase(res);
             }
+            if(method.equals("diffTestcaseByEnvId")){
+                String fromEnvId = request.getParameter("fromEnvId");
+                String destEnvId = request.getParameter("destEnvId");
+                String page = request.getParameter("page");
+                String count = request.getParameter("count");
+                diffTestcaseByEnvId(res,fromEnvId,destEnvId,page,count);
+            }
+            if(method.equals("copyAllTestcase")){
+                String allDiffCaseIds = request.getParameter("allDiffCaseIds");
+                String destEnvId = request.getParameter("destEnvId");
+                copyAllTestcase(res,allDiffCaseIds,destEnvId);
+            }
+            if(method.equals("copySingleTestcase")){
+                String caseId = request.getParameter("caseId");
+                String destEnvId = request.getParameter("destEnvId");
+                copySingleTestcase(res,caseId,destEnvId);
+            }
         }catch(Exception e){
             e.printStackTrace();
             res.put("success", false);
@@ -962,6 +979,130 @@ public class TestcaseService {
         }
         res.put("success", true);
         res.put("data", arr);
+    }
+    public void diffTestcaseByEnvId(JSONObject res, String fromEnvId, String destEnvId, String page, String count) throws Exception{
+        int fromEnvIdInt = Integer.parseInt(fromEnvId);
+        int destEnvIdInt = Integer.parseInt(destEnvId);
+        int pageInt = Integer.parseInt(page);
+        int countInt = Integer.parseInt(count);
+        TestcaseExample example = new TestcaseExample();
+        TestcaseExample.Criteria criteria = example.createCriteria();
+        criteria.andStatusNotEqualTo(0);
+        criteria.andTestEnvIdEqualTo(destEnvIdInt);
+        List<Testcase> tcList = testcaseMapper.selectByExample(example);
+        List<String> tcNameList = Lists.newArrayList();
+        for(Testcase tc : tcList){
+            tcNameList.add(tc.getNote());
+        }
+        TestcaseExample example2 = new TestcaseExample();
+        TestcaseExample.Criteria criteria2 = example2.createCriteria();
+        criteria2.andStatusNotEqualTo(0);
+        criteria2.andTestEnvIdEqualTo(fromEnvIdInt);
+        criteria2.andNoteNotIn(tcNameList);
+        List<Testcase> tcList2 = testcaseMapper.selectByExample(example2);
+        int totalCount = tcList2.size();
+        String allDiffCaseIds = "";
+        for(Testcase tc : tcList2){
+            allDiffCaseIds += tc.getId() + ",";
+        }
+        int totalPage = (int)Math.ceil(totalCount/Double.parseDouble(count));
+        totalPage = totalPage==0?1:totalPage;
+        example2.setOrderByClause("id limit "+(pageInt-1)*countInt+","+countInt);
+        List<Testcase> tcList3 = testcaseMapper.selectByExample(example2);
+        JSONArray arr = new JSONArray();
+        if(tcList3.size() > 0){
+            for(Testcase tc : tcList3){
+                JSONObject obj = (JSONObject)JSONObject.toJSON(tc);
+                obj.put("teamName",ts.getNameById(tc.getTeamId()));
+                obj.put("serviceName",ss.getNameById(tc.getServiceId()));
+                obj.put("testEnvName",es.getNameById(tc.getTestEnvId()));
+                obj.put("addUserNameCn",us.getUserNameCnById(tc.getAddUserId()));
+                obj.put("updateUserNameCn",us.getUserNameCnById(tc.getUpdateUserId()));
+                arr.add(obj);
+            }
+        }
+        res.put("success", true);
+        res.put("data", arr);
+        res.put("totalCount", totalCount);
+        res.put("totalPage", totalPage);
+        res.put("allDiffCaseIds", allDiffCaseIds);
+    }
+    public void copyAllTestcase(JSONObject res,String allDiffCaseIds,String destEnvId) throws Exception{
+        int destEnvIdInt = Integer.parseInt(destEnvId);
+        int diffCount = 0;
+        int copyCount = 0;
+        for(String caseId : allDiffCaseIds.split(",")){
+            caseId = caseId.trim();
+            if(!caseId.equals("")){
+                diffCount ++;
+                int caseIdInt = Integer.parseInt(caseId);
+                int tcId = copySingleTestcase(caseIdInt,destEnvIdInt);
+                if(tcId > 0){
+                    copyCount++;
+                }
+            }
+        }
+        res.put("success", true);
+        res.put("data", "copySingleTestcase success.已拷贝数/总数="+copyCount+"/"+diffCount);
+    }
+    public void copySingleTestcase(JSONObject res,String caseId,String destEnvId) throws Exception{
+        int caseIdInt = Integer.parseInt(caseId);
+        int destEnvIdInt = Integer.parseInt(destEnvId);
+        int tcId = copySingleTestcase(caseIdInt,destEnvIdInt);
+        if(tcId > 0){
+            res.put("success", true);
+            res.put("data", "copySingleTestcase success");
+        }else{
+            res.put("success", false);
+            res.put("data", "copySingleTestcase failed");
+        }
+    }
+    public int copySingleTestcase(int caseId,int destEnvId) throws Exception{
+        Testcase testcase = getById(caseId);
+        Testcase tcExist = getTestcaseByEnvIdAndName(destEnvId,testcase.getNote());
+        if(tcExist != null){
+            return tcExist.getId();
+        }
+        testcase.setTestEnvId(destEnvId);
+        testcase.setStatus(1);
+        String preOpsIds = testcase.getPreOpsIds();
+        String afterOpsIds = testcase.getAfterTestOpsIds();
+        String postOpsIds = testcase.getPostOpsIds();
+        String preOpsIds2 = os.copyOps(preOpsIds,destEnvId);
+        String afterOpsIds2 = os.copyOps(afterOpsIds,destEnvId);
+        String postOpsIds2 = os.copyOps(postOpsIds,destEnvId);
+        testcase.setPreOpsIds(preOpsIds2);
+        testcase.setAfterTestOpsIds(afterOpsIds2);
+        testcase.setPostOpsIds(postOpsIds2);
+        Date now = new Date();
+        testcase.setAddTime(now);
+        testcase.setUpdateTime(now);
+        testcase.setId(null);
+        testcaseMapper.insert(testcase);
+        Testcase testcase2 = getTestcaseByEnvIdAndName(destEnvId,testcase.getNote());
+        if(testcase2 != null){
+            DataSourceLoop dataSourceLoop = dataSourceLoopMapper.selectByPrimaryKey(testcase2.getId());
+            if(dataSourceLoop != null){
+                dataSourceLoop.setCaseId(testcase2.getId());
+                dataSourceLoopMapper.insert(dataSourceLoop);
+            }
+            return testcase2.getId();
+        }else{
+            return 0;
+        }
+    }
+    private Testcase getTestcaseByEnvIdAndName(int envId,String name) throws Exception{
+        TestcaseExample example = new TestcaseExample();
+        TestcaseExample.Criteria criteria = example.createCriteria();
+        criteria.andStatusNotEqualTo(0);
+        criteria.andTestEnvIdEqualTo(envId);
+        criteria.andNoteEqualTo(name);
+        List<Testcase> tcList = testcaseMapper.selectByExample(example);
+        if(tcList.size() == 1){
+            return tcList.get(0);
+        }else {
+            return null;
+        }
     }
     private int getCaseNumBySrvIdAndEnvId(int srvId,int envId) throws Exception{
         TestcaseExample example = new TestcaseExample();

@@ -239,4 +239,34 @@ public class DbService {
     public Db getDbById(int dbId) throws Exception{
         return dbMapper.selectByPrimaryKey(dbId);
     }
+    public int copyDb(int dbId,int destEnvId) throws Exception{
+        Db db = getDbById(dbId);
+        Db dbExist = getDbByEnvIdAndName(destEnvId,db.getName());
+        if(dbExist != null){
+            return dbExist.getId();
+        }
+        db.setEnvId(destEnvId);
+        Date now = new Date();
+        db.setAddTime(now);
+        db.setUpdateTime(now);
+        db.setId(null);
+        dbMapper.insert(db);
+        Db db2 = getDbByEnvIdAndName(destEnvId,db.getName());
+        if(db2 != null) {
+            return db2.getId();
+        }else{
+            return 0;
+        }
+    }
+    private Db getDbByEnvIdAndName(int envId , String name) throws Exception{
+        DbExample example = new DbExample();
+        DbExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envId);
+        criteria.andNameEqualTo(name);
+        List<Db> dbList = dbMapper.selectByExample(example);
+        if(dbList.size() == 1){
+            return dbList.get(0);
+        }
+        return null;
+    }
 }

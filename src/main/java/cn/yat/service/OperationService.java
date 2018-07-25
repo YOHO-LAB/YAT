@@ -219,6 +219,65 @@ public class OperationService{
             res.put("data", "delete failed");
         }
     }
+    public String copyOps(String ids,int destEnvId) throws Exception{
+        String newIds = "";
+        for(String id : ids.split(",")){
+            id = id.trim();
+            if(!id.equals("")){
+                int idInt = Integer.parseInt(id);
+                Operation operation = getById(idInt);
+                Operation opsExist = getOpsByEnvIdAndName(destEnvId,operation.getName());
+                if(opsExist != null){
+                    newIds += opsExist.getId()+",";
+                }else{
+                    operation.setEnvId(destEnvId);
+                    Date now = new Date();
+                    operation.setAddTime(now);
+                    operation.setUpdateTime(now);
+                    int opsType = operation.getOpsType();
+                    if(opsType == 1){// 执行sql语句
+                        int dbId2 = ds.copyDb(operation.getDbId(),destEnvId);
+                        operation.setDbId(dbId2);
+                    }
+                    if(opsType == 2){// http请求 - 暂无
+                    }
+                    if(opsType == 3){// 执行测试用例
+                        int tcId2 = ts.copySingleTestcase(operation.getTcId(),destEnvId);
+                        operation.setTcId(tcId2);
+                    }
+                    if(opsType == 5){// 等待时间
+                    }
+                    operation.setId(null);
+                    operationMapper.insert(operation);
+                    Operation operation2 = getOpsByEnvIdAndName(destEnvId,operation.getName());
+                    if(operation2 != null){
+                        int opsId2 = operation2.getId();
+                        if(opsType == 4){// 执行java方法
+                            BshJavaCode bshJavaCode = bshJavaCodeMapper.selectByPrimaryKey(idInt);
+                            if(bshJavaCode != null){
+                                bshJavaCode.setOpsId(opsId2);
+                                bshJavaCodeMapper.insert(bshJavaCode);
+                            }
+                        }
+                        newIds += opsId2+",";
+                    }
+                }
+            }
+        }
+        return newIds;
+    }
+    private Operation getOpsByEnvIdAndName(int envId,String name) throws Exception{
+        OperationExample example = new OperationExample();
+        OperationExample.Criteria criteria = example.createCriteria();
+        criteria.andEnvIdEqualTo(envId);
+        criteria.andNameEqualTo(name);
+        List<Operation> opsList = operationMapper.selectByExample(example);
+        if(opsList.size() == 1){
+            return opsList.get(0);
+        }else{
+            return null;
+        }
+    }
     public void getAllOps(JSONObject res) throws Exception{
         OperationExample example = new OperationExample();
         OperationExample.Criteria criteria = example.createCriteria();

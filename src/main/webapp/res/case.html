@@ -29,32 +29,83 @@
             <div class="wrapper wrapper-content no-padding" ng-controller="ng-ctrl-yat-content" style="padding: 15px;">
                 <div class="container-fluid" style="padding-right:0px;padding-left:0px;">
                     <div class="row">
-                        <div class="col-lg-12">
+                        <div class="col-lg-12" ng-show="isCopyTc">
                             <div class="ibox">
                                 <div class="ibox-title">
-                                    <h5>测试用例列表 <small class="m-l-sm">testcase</small></h5>
-                                    <!--
+                                    <h5>复制用例 <small class="m-l-sm">在相同项目内，不同环境间，复制用例</small></h5>
                                     <div class="ibox-tools">
-                                        <a class="collapse-link">
-                                            <i class="fa fa-chevron-up"></i>
-                                        </a>
-                                        <a class="dropdown-toggle" data-toggle="dropdown" href="tabs_panels.html#">
-                                            <i class="fa fa-wrench"></i>
-                                        </a>
-                                        <ul class="dropdown-menu dropdown-user">
-                                            <li><a href="tabs_panels.html#">Config option 1</a>
-                                            </li>
-                                            <li><a href="tabs_panels.html#">Config option 2</a>
-                                            </li>
-                                        </ul>
-                                        <a class="close-link">
-                                            <i class="fa fa-times"></i>
-                                        </a>
+                                        <a class="btn btn-primary btn-xs" ng-click="diff()"><i class="fa fa-binoculars"> 对比差异，返回目标环境中缺少的用例</i></a>
+                                        <a class="btn btn-info btn-outline btn-xs" ng-click="copyAll()"><i class="fa fa-copy"> 全部复制</i></a>
+                                        <a class="btn btn-default btn-xs" ng-click="isCopyTc=false"><i class="fa fa-arrow-circle-left"> 返回</i></a>
                                     </div>
-                                    -->
+                                </div>
+                                <div class="ibox-content">
+                                    <div class="row">
+                                        <div class="col-lg-12" >
+                                            <div class="form-group">
+                                                <label class="control-label">目标 环境：</label>
+                                                <select class="select2_env_diff_destination form-control">
+                                                    <option value="0">-- 选择 --</option>
+                                                    <option value="{{opt.id}}" ng-repeat="opt in environmentList">{{opt.name}}</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-lg-12" ng-show="caseList2.length>0">
+                                            <div class="col-lg-12 m-t-xs">
+                                                <div style="text-align: center"> <ul id="pageLimit2" style="margin-bottom: 0px;"></ul></div>
+                                                <div style="text-align: center"><small style="color: blue">目标环境中缺少的用例，总共{{totalPage2}}页，当前第{{page2}}页</small></div>
+
+                                                <table class="table table-hover yatFixedTable">
+                                                    <thead>
+                                                    <tr class="yatWrap">
+                                                        <th width="5%">Id</th>
+                                                        <th>团队</th><th>服务</th>
+                                                        <!--<th>环境</th>-->
+                                                        <th width="20%">Method</th>
+                                                        <th>创建者</th><th>修改者</th><th>修改时间</th>
+                                                        <th>状态 / 复制</th><th width="20%">用例名</th>
+                                                    </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                    <tr ng-repeat="tr in caseList2" class="yatWrap">
+                                                        <td>{{tr.id}}</td>
+                                                        <td>{{tr.teamName}}</td>
+                                                        <td>{{tr.serviceName}}</td>
+                                                        <!--<td>{{tr.testEnvName}}</td>-->
+                                                        <td>{{tr.method}}</td>
+                                                        <td>{{tr.addUserNameCn}}</td>
+                                                        <td>{{tr.updateUserNameCn}}</td>
+                                                        <td>{{tr.updateTime | timeFilter}}</td>
+                                                        <td>
+                                                            <span class="badge badge-danger" ng-show="tr.status==0">删除</span>
+                                                            <span class="badge badge-muted" ng-show="tr.status==1">未CI</span>
+                                                            <span class="badge badge-primary" ng-show="tr.status==2">CI</span>
+                                                            /
+                                                            <a class="btn btn-white btn-xs" ng-click="copySingle(tr.id)">
+                                                                <i class="fa fa-copy"> 复制</i>
+                                                            </a>
+                                                        </td>
+                                                        <td><a href="case-editor.html?caseId={{tr.id}}" >{{tr.note}}</a></td>
+                                                    </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="ibox-footer">
+                                                共{{totalCount2}}条记录
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12" ng-show="!isCopyTc">
+                        <div class="ibox">
+                                <div class="ibox-title">
+                                    <h5>测试用例列表 <small class="m-l-sm">testcase</small></h5>
                                     <div class="ibox-tools">
                                         <!--<a class="btn btn-primary btn-xs" ng-click="rightSidebar(true)"><i class="fa fa-plus"> 新增用例</i></a>-->
                                         <a class="btn btn-success btn-xs btn-outline" ng-click="executeSearchResult()"><i class="fa fa-caret-right"> 执行搜索出来的用例</i></a>
+                                        <a class="btn btn-warning btn-xs btn-outline" ng-click="copyTestcase()"><i class="fa fa-copy"> 复制用例</i></a>
                                         <a class="btn btn-primary btn-xs" href="case-editor.html" target="_blank"><i class="fa fa-plus"> 新增用例</i></a>
                                     </div>
                                 </div>
@@ -72,12 +123,6 @@
                                                 <select class="form-control" ng-model="s_serviceId" ng-options="s.id as s.name for s in serviceList"></select>
                                             </div>
                                         </div>
-                                        <!--<div class="col-lg-3">-->
-                                            <!--<div class="input-group">-->
-                                                <!--<span class="input-group-addon"><strong>环境</strong></span>-->
-                                                <!--<select class="form-control" ng-model="s_envId" ng-options="s.id as s.name for s in environmentList"></select>-->
-                                            <!--</div>-->
-                                        <!--</div>-->
                                         <div class="col-lg-3">
                                             <div class="input-group">
                                                 <span class="input-group-addon"><strong>状态</strong></span>
@@ -128,13 +173,11 @@
                                         </div>
 
                                         <div class="col-lg-3 m-t-xs">
-                                                <button class="form-control btn btn-outline btn-primary" ng-click="getCase()"><i class="fa fa-search"> 搜索</i></button>
+                                            <button class="form-control btn btn-outline btn-primary" ng-click="getCase()"><i class="fa fa-search"> 搜索</i></button>
                                         </div>
 
                                         <div class="col-lg-12 m-t-xs">
                                             <div style="text-align: center"> <ul id="pageLimit" style="margin-bottom: 0px;"></ul></div>
-                                        </div>
-                                        <div class="col-lg-12">
                                             <div style="text-align: center"><small>总共{{totalPage}}页，当前第{{page}}页</small></div>
                                         </div>
                                         <div class="col-lg-12">
