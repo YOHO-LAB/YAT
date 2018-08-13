@@ -385,6 +385,30 @@ myAppModule.controller('ng-ctrl-yat-content', function ($scope ,$rootScope , $ht
     var urlOpId = $scope.getUrlParamValue("opId");
     if($scope.NN(urlOpId)){
         $scope.s_ops_id = urlOpId;
+        $http.post('http://'+window.location.host+'/yat/api/data',
+            {'method':'getOpsByOpsId','opsId':urlOpId}
+        ).success(function (data) {
+            if(data.success){
+                $scope.clickTr(data.data);
+                var timer = $interval(function () {
+                    var t1 = false;
+                    var t2 = false;
+                    if($scope.dbList != undefined){
+                        $scope.triggerSelect2("select2_db",data.data.dbId);
+                        t1 = true;
+                    }
+                    if($scope.caseList != undefined){
+                        $scope.triggerSelect2("select2_case",data.data.tcId);
+                        t2 = true;
+                    }
+                    if(t1 && t2){
+                        $interval.cancel(timer);
+                    }
+                },100,50);
+            }else{
+                alert("[Error][getOpsByOpsId]:"+data.data);
+            }
+        });
     }
     $scope.page = 1;
     $scope.totalPage = 0;

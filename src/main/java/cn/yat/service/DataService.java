@@ -256,6 +256,10 @@ public class DataService {
                 String opsId = request.getParameter("opsId");
                 os.getJavaCodeByOpsId(res,opsId);
             }
+            if(method.equals("getOpsByOpsId")){
+                String opsId = request.getParameter("opsId");
+                os.getOpsByOpsId(res,opsId);
+            }
             // hosts
             if(method.equals("getHosts")){
                 getHosts(res);

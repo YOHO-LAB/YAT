@@ -304,6 +304,11 @@ public class OperationService{
     public Operation getById(int id) throws Exception{
         return operationMapper.selectByPrimaryKey(id);
     }
+    public void getOpsByOpsId(JSONObject res ,String opsId) throws Exception{
+        Operation operation = getById(Integer.parseInt(opsId));
+        res.put("success", true);
+        res.put("data", operation);
+    }
     public int addOperation(Operation operation) throws Exception{
         int ist = operationMapper.insert(operation);
         if(ist > 0){
