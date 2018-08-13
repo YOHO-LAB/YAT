@@ -6,7 +6,26 @@
  - `首页地址` http://YOUR_SERVER:PORT/yat/pages/index.html
  
 ## Wiki 
-   https://github.com/YOHO-LAB/YAT/wiki
+   详细使用方法，请见wiki：https://github.com/YOHO-LAB/YAT/wiki
+   
+   * [概览页](https://github.com/YOHO-LAB/YAT/wiki/%E6%A6%82%E8%A7%88%E9%A1%B5)
+   * [测试用例页](https://github.com/YOHO-LAB/YAT/wiki/%E6%B5%8B%E8%AF%95%E7%94%A8%E4%BE%8B%E9%A1%B5)
+   * [参数化维护（全局变量）页](https://github.com/YOHO-LAB/YAT/wiki/%E5%8F%82%E6%95%B0%E5%8C%96%E7%BB%B4%E6%8A%A4%EF%BC%88%E5%85%A8%E5%B1%80%E5%8F%98%E9%87%8F%EF%BC%89%E9%A1%B5)
+   * [数据库维护页](https://github.com/YOHO-LAB/YAT/wiki/%E6%95%B0%E6%8D%AE%E5%BA%93%E7%BB%B4%E6%8A%A4%E9%A1%B5)
+   * [前后置操作维护页](https://github.com/YOHO-LAB/YAT/wiki/%E5%89%8D%E5%90%8E%E7%BD%AE%E6%93%8D%E4%BD%9C%E7%BB%B4%E6%8A%A4%E9%A1%B5)
+   * [运行结果列表页](https://github.com/YOHO-LAB/YAT/wiki/%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C%E5%88%97%E8%A1%A8%E9%A1%B5)
+   * [用例编辑](https://github.com/YOHO-LAB/YAT/wiki/%E7%94%A8%E4%BE%8B%E7%BC%96%E8%BE%91)
+   * [测试报告](https://github.com/YOHO-LAB/YAT/wiki/%E6%B5%8B%E8%AF%95%E6%8A%A5%E5%91%8A)
+   * [登录、环境切换](https://github.com/YOHO-LAB/YAT/wiki/%E7%99%BB%E5%BD%95%E3%80%81%E7%8E%AF%E5%A2%83%E5%88%87%E6%8D%A2)
+   * [团队、项目、测试环境、服务名、测试机Hosts 维护页](https://github.com/YOHO-LAB/YAT/wiki/%E5%9B%A2%E9%98%9F%E3%80%81%E9%A1%B9%E7%9B%AE%E3%80%81%E6%B5%8B%E8%AF%95%E7%8E%AF%E5%A2%83%E3%80%81%E6%9C%8D%E5%8A%A1%E5%90%8D%E3%80%81%E6%B5%8B%E8%AF%95%E6%9C%BAHosts-%E7%BB%B4%E6%8A%A4%E9%A1%B5)
+ 
+## 如何新增一条用例
+ - 首先维护好用例所属的项目/环境；
+ - 切换到该环境下，在测试用例页面，点击新增用例；
+ - 填写用例名、URL参数、检查点、前后置操作等信息；（用例中用到的团队名、服务名、前后置操作需要提前维护，也可以在用例中维护然后点击刷新即可选择）
+ - 对用例中需要参数化的地方进行参数化；
+ - 可以使用数据驱动，实现一条用例对应多种场景；也可以不使用，直接就是单条用例；
+ - 保存后，点击调试，进行用例调试，根据调试结果进行用例修改；
  
 ## 工程结构及说明
 `src/main`
