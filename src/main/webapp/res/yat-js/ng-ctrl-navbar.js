@@ -5,8 +5,8 @@ myAppModule.controller('ng-ctrl-yat-nav', function ($scope ,$rootScope , $http ,
             if(data.success){
                 $scope.login_info = "";
                 var expireDate = new Date();
-                expireDate.setDate(expireDate.getDate() + 0.5);
-                $cookies.putObject('user',data.data,{'expires': expireDate.toUTCString()});
+                expireDate.setTime(expireDate.getTime() + 12 * 60 * 60 * 1000);// cookie 12小时有效
+                $cookies.putObject('user',data.data,{expires: new Date(expireDate)});
                 $scope.loginUser = data.data;
                 $scope.isLogin = true;
                 $('#loginModal').modal('hide');
