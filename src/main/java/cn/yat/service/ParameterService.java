@@ -463,9 +463,14 @@ public class ParameterService {
                 String userName = db.getUserName();
                 String password = db.getPassWord();
                 res = JdbcUtil.query(ip,port,dbName,userName,password,sql,column,getValType);
-                if(isUseDefault == 1){
-                    oParameter.setDefaultValue(res);
-                    parameterMapper.updateByPrimaryKey(oParameter);
+                if(res.trim().equals("")){
+                    res = oParameter.getDefaultValue();
+                    LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，sql(dbId="+dbId+")执行结果为空字符串，返回默认值："+res,"darkorange","","");
+                }else{
+                    if(isUseDefault == 1){
+                        oParameter.setDefaultValue(res);
+                        parameterMapper.updateByPrimaryKey(oParameter);
+                    }
                 }
             }catch (Exception e){
                 if(isUseDefault == 1 || isUseDefault == 2){
@@ -489,9 +494,14 @@ public class ParameterService {
             int isUseDefault = oParameter.getIsUseDefault();
             try {
                 res = exeParamTc(globalParamMap,oParameter.getName(),tcId,tcHeader,tcCookie,tcJsonPath);
-                if(isUseDefault == 1){
-                    oParameter.setDefaultValue(res);
-                    parameterMapper.updateByPrimaryKey(oParameter);
+                if(res.trim().equals("")){
+                    res = oParameter.getDefaultValue();
+                    LogUtil.addLog(uuid,"参数替换-默认值","参数名："+oParameter.getName()+"，用例(id="+tcId+")执行结果为空字符串，返回默认值："+res,"darkorange","","");
+                }else{
+                    if(isUseDefault == 1){
+                        oParameter.setDefaultValue(res);
+                        parameterMapper.updateByPrimaryKey(oParameter);
+                    }
                 }
             }catch (Exception e){
                 if(isUseDefault == 1 || isUseDefault == 2){
