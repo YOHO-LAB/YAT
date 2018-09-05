@@ -524,18 +524,20 @@ public class OperationService{
                         left = cpu.convertJsonpathToString(jsonpathRes);
                     }
 
+                    String color = "blue";
                     if(left == null){
                         LogUtil.addLog(uuid,title,"用例id="+tcId+",返回结果中未找到匹配JsonPath="+jsonPath+"的值!","","lightgray","");
-                        continue;
-                    }else{
-                        String p = opsFlag+"."+paramName;
-                        String v = left;
-                        LogUtil.addLog(uuid,title,"得到参数："+p+" = "+v,"blue","","");
-                        if(!opsFlag.equals("debug")){
-                            localParamMap.put(p,v);
-                        }
-                        dataList.add(paramName+" = "+v);
+                        // 未找到匹配值时返回空值
+                        left = "";
+                        color = "orangered";
                     }
+                    String p = opsFlag+"."+paramName;
+                    String v = left;
+                    LogUtil.addLog(uuid,title,"得到参数："+p+" = "+v,color,"","");
+                    if(!opsFlag.equals("debug")){
+                        localParamMap.put(p,v);
+                    }
+                    dataList.add(paramName+" = "+v);
                     continue;
                 }
             }
